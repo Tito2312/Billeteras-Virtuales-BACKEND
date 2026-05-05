@@ -15,13 +15,6 @@ public class UserService {
     
     private final UserRepository userRepository;
 
-    public User register(User user) {
-        if (userRepository.existsByEmail(user.getEmail())) {
-            throw new RuntimeException("Ya existe un usuario con ese correo");
-        }
-        return userRepository.save(user);
-    }
-
     public User findById(String id){
         return userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));

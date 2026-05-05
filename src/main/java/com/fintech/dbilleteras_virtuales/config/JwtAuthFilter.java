@@ -2,7 +2,7 @@ package com.fintech.dbilleteras_virtuales.config;
 
 import java.io.IOException;
 
-import org.apache.catalina.User;
+import com.fintech.dbilleteras_virtuales.model.User;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,33 +27,39 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final UserRepository userRepository;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+protected void doFilterInternal(HttpServletRequest request,
+                                HttpServletResponse response,
+                                FilterChain filterChain) throws ServletException, IOException {
 
+    try {
         String authHeader = request.getHeader("Authorization");
 
-        
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String token = authHeader.substring(7); 
+        String token = authHeader.substring(7);
         String email = jwtService.extractEmail(token);
 
-        // Si el email es válido y no hay sesión activa aún
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             User user = (User) userRepository.findByEmail(email).orElse(null);
 
             if (user != null && jwtService.isTokenValid(token, user)) {
                 UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(user, null, ((AbstractAuthenticationToken) user).getAuthorities());
+                        new UsernamePasswordAuthenticationToken(user, null, (user).getAuthorities());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
 
         filterChain.doFilter(request, response);
+
+    } catch (Exception e) {
+        // Esto nos va a mostrar el error real en consola
+        System.err.println("Error en JwtAuthFilter: " + e.getMessage());
+        e.printStackTrace();
+        filterChain.doFilter(request, response);
     }
+}
 }

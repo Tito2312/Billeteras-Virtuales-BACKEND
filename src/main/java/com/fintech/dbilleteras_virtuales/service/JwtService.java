@@ -39,7 +39,7 @@ public class JwtService {
         return extractClaim(token, Claims::getSubject);
     }
 
-    public boolean isTokenValid(String token, org.apache.catalina.User user) {
+    public boolean isTokenValid(String token, User user) {
         return extractEmail(token).equals(user.getUsername())
                 && !isTokenExpired(token);
     }

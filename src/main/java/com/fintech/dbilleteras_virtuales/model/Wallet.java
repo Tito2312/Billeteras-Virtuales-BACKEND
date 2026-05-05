@@ -1,7 +1,6 @@
 package com.fintech.dbilleteras_virtuales.model;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -23,6 +22,6 @@ public class Wallet {
     private String name;
     private String type;
     private double balance;
-    private boolean isActive = true;
+    private boolean isActive;
     private LocalDate createdAt;
 }
