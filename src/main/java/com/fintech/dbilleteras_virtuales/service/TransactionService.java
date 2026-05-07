@@ -13,11 +13,10 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class TransactionService {
-    
+
     private final TransactionRepository transactionRepository;
 
-
-    public Transaction findById(String id){
+    public Transaction findById(String id) {
         return transactionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Transacción no encontrada"));
     }

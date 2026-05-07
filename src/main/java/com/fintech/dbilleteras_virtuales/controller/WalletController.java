@@ -33,7 +33,7 @@ public class WalletController {
         return ResponseEntity.status(HttpStatus.CREATED).body(walletService.createWallet(request));
     }
 
-     @GetMapping("/user/{userId}")
+    @GetMapping("/user/{userId}")
     public ResponseEntity<List<Wallet>> findAllByUser(@PathVariable String userId) {
         return ResponseEntity.ok(walletService.findAllByUser(userId));
     }
@@ -44,17 +44,18 @@ public class WalletController {
     }
 
     @PostMapping("/{id}/balance")
-    public ResponseEntity<Double> getBalance(@PathVariable String id, @RequestParam String userId){
+    public ResponseEntity<Double> getBalance(@PathVariable String id, @RequestParam String userId) {
         return ResponseEntity.ok(walletService.getBalance(id, userId));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Wallet> update(@PathVariable String id, @RequestBody @Valid WalletRequest request, @RequestParam String userId) {
+    public ResponseEntity<Wallet> update(@PathVariable String id, @RequestBody @Valid WalletRequest request,
+            @RequestParam String userId) {
         return ResponseEntity.ok(walletService.update(id, userId, request));
     }
 
     @PatchMapping("/{id}/activate")
-    public ResponseEntity<Wallet> activate(@PathVariable String id,@RequestParam String userId) {
+    public ResponseEntity<Wallet> activate(@PathVariable String id, @RequestParam String userId) {
         return ResponseEntity.ok(walletService.activate(id, userId));
     }
 
@@ -62,6 +63,5 @@ public class WalletController {
     public ResponseEntity<Wallet> deactivate(@PathVariable String id, @RequestParam String userId) {
         return ResponseEntity.ok(walletService.deactivate(id, userId));
     }
-
 
 }

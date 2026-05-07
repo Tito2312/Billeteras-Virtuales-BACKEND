@@ -17,27 +17,27 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class WalletService {
-    
+
     private final WalletRepository walletRepository;
     private final UserRepository userRepository;
 
     public Wallet createWallet(WalletRequest request) {
-    if (!userRepository.existsById(request.getUserId())) {
-        throw new IllegalArgumentException("User not found");
+        if (!userRepository.existsById(request.getUserId())) {
+            throw new IllegalArgumentException("User not found");
+        }
+
+        Wallet wallet = Wallet.builder()
+                .userId(request.getUserId())
+                .name(request.getName())
+                .type(request.getType())
+                .balance(0.0)
+                .isActive(true)
+                .createdAt(LocalDate.now())
+                .build();
+
+        return walletRepository.save(wallet);
     }
 
-    Wallet wallet = Wallet.builder()
-            .userId(request.getUserId())
-            .name(request.getName())
-            .type(request.getType())
-            .balance(0.0)
-            .isActive(true)
-            .createdAt(LocalDate.now())
-            .build();
-
-    return walletRepository.save(wallet);
-}
-    
     public List<Wallet> findAllByUser(String userId) {
         if (!userRepository.existsById(userId)) {
             throw new IllegalArgumentException("User not found");
@@ -54,11 +54,11 @@ public class WalletService {
     }
 
     public Wallet update(String id, String userId, WalletRequest request) {
-    Wallet wallet = findById(id, userId);
-    wallet.setName(request.getName());
-    wallet.setType(request.getType());
-    return walletRepository.save(wallet);
-}
+        Wallet wallet = findById(id, userId);
+        wallet.setName(request.getName());
+        wallet.setType(request.getType());
+        return walletRepository.save(wallet);
+    }
 
     public Wallet activate(String id, String userId) {
         Wallet wallet = findById(id, userId);

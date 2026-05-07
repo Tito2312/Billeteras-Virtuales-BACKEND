@@ -9,7 +9,6 @@ import io.jsonwebtoken.security.Keys;
 
 import org.springframework.stereotype.Service;
 
-
 import com.fintech.dbilleteras_virtuales.model.User;
 import java.util.function.Function;
 
@@ -22,7 +21,7 @@ public class JwtService {
     private String secretKey;
 
     @Value("${jwt.expiration}")
-    private long expiration; 
+    private long expiration;
 
     public String generateToken(User user) {
         return Jwts.builder()
@@ -60,5 +59,4 @@ public class JwtService {
     private SecretKey getSignKey() {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
     }
-} 
-  
+}

@@ -15,7 +15,7 @@ import lombok.AllArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Transaction{
+public class Transaction {
 
     @Id
     private String id;
@@ -28,6 +28,6 @@ public class Transaction{
     private TransactionStatus status;
     private int points;
     private boolean reversed;
-    private LocalDateTime createdAt; 
+    private LocalDateTime createdAt;
 
 }

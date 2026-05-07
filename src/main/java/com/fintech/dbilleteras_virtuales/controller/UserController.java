@@ -21,9 +21,9 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {
-    
+
     private final UserService userService;
-    
+
     @GetMapping("/{id}")
     public ResponseEntity<User> findById(@PathVariable String id) {
         return ResponseEntity.ok(userService.findById(id));

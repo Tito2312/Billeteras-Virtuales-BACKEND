@@ -13,7 +13,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Wallet {
-    
+
     @Id
     private String id;
 
