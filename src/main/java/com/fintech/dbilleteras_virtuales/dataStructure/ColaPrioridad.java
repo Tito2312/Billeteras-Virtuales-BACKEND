@@ -1,4 +1,4 @@
-package main.java.com.fintech.dbilleteras_virtuales.dataStructure;
+package com.fintech.dbilleteras_virtuales.dataStructure;
 
 public class ColaPrioridad<T extends Comparable<T>> {
     private NodoColaPrioridad<T> cabeza;
