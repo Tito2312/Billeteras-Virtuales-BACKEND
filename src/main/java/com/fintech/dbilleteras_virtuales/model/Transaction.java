@@ -15,12 +15,13 @@ import lombok.AllArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Transaction {
+public class Transaction{
 
     @Id
     private String id;
 
     private String userId;
+    private String receiverUserId;
     private String sourceWallet;
     private String targetWallet;
     private TransactionType type;
@@ -28,6 +29,6 @@ public class Transaction {
     private TransactionStatus status;
     private int points;
     private boolean reversed;
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt; 
 
 }
