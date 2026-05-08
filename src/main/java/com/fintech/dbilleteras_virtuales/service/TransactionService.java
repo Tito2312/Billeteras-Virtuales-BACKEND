@@ -13,10 +13,11 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class TransactionService {
-
+    
     private final TransactionRepository transactionRepository;
 
-    public Transaction findById(String id) {
+
+    public Transaction findById(String id){
         return transactionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Transacción no encontrada"));
     }
@@ -46,6 +47,17 @@ public class TransactionService {
     public Transaction transfer(String userId, String sourceWallet, String targetWallet, double amount) {
         Transaction transaction = new Transaction();
         transaction.setUserId(userId);
+        transaction.setSourceWallet(sourceWallet);
+        transaction.setTargetWallet(targetWallet);
+        transaction.setAmount(amount);
+        transaction.setType(TransactionType.TRANSFER);
+        return transactionRepository.save(transaction);
+    }
+
+    public Transaction transfer(String userId, String receiverUserId ,String sourceWallet, String targetWallet, double amount) {
+        Transaction transaction = new Transaction();
+        transaction.setUserId(userId);
+        transaction.setReceiverUserId(receiverUserId);
         transaction.setSourceWallet(sourceWallet);
         transaction.setTargetWallet(targetWallet);
         transaction.setAmount(amount);
