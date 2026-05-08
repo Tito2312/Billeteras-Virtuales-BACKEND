@@ -5,30 +5,26 @@ import java.time.LocalDateTime;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import lombok.Data;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+import lombok.*;
 
-@Document(collection = "transactions")
+@Document(collection = "scheduledOperations")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Transaction{
-
+public class ScheduledOperation {
+    
     @Id
     private String id;
 
     private String userId;
     private String receiverUserId;
-    private String sourceWallet;
-    private String targetWallet;
+    private String sourceWalletId;
+    private String targetWalletId;
     private TransactionType type;
     private double amount;
-    private TransactionStatus status;
-    private int points;
-    private boolean reversed;
-    private LocalDateTime createdAt; 
+    private LocalDateTime scheduledDate;
+    private boolean executed;
+    private LocalDateTime createdAt;
 
 }
