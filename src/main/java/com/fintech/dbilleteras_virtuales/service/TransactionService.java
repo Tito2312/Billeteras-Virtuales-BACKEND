@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import com.fintech.dbilleteras_virtuales.model.Transaction;
 import com.fintech.dbilleteras_virtuales.model.TransactionType;
 import com.fintech.dbilleteras_virtuales.repository.TransactionRepository;
+import com.fintech.dbilleteras_virtuales.repository.UserRepository;
+import com.fintech.dbilleteras_virtuales.service.NotificationService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -14,7 +16,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class TransactionService {
 
+    private final NotificationService notificationService;
     private final TransactionRepository transactionRepository;
+    private final UserRepository userRepository;
 
     public Transaction findById(String id) {
         return transactionRepository.findById(id)
@@ -31,7 +35,13 @@ public class TransactionService {
         transaction.setTargetWallet(targetWallet);
         transaction.setAmount(amount);
         transaction.setType(TransactionType.RECHARGE);
-        return transactionRepository.save(transaction);
+        Transaction savedTransaction = transactionRepository.save(transaction);
+
+        var user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        notificationService.notificationTransaction(user.getEmail(), "RECARGA", amount);
+
+        return savedTransaction;
     }
 
     public Transaction withdrawal(String userId, String sourceWallet, double amount) {
@@ -40,7 +50,13 @@ public class TransactionService {
         transaction.setSourceWallet(sourceWallet);
         transaction.setAmount(amount);
         transaction.setType(TransactionType.WITHDRAWAL);
-        return transactionRepository.save(transaction);
+        Transaction savedTransaction = transactionRepository.save(transaction);
+
+        var user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        notificationService.notificationTransaction(user.getEmail(), "RETIRO", amount);
+
+        return savedTransaction;
     }
 
     public Transaction transfer(String userId, String sourceWallet, String targetWallet, double amount) {
@@ -50,7 +66,12 @@ public class TransactionService {
         transaction.setTargetWallet(targetWallet);
         transaction.setAmount(amount);
         transaction.setType(TransactionType.TRANSFER);
-        return transactionRepository.save(transaction);
+        Transaction savedTransaction = transactionRepository.save(transaction);
+
+        var user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        notificationService.notificationTransaction(user.getEmail(), "TRANSFERENCIA", amount);
+        return savedTransaction;
     }
 
     public Transaction reverseTransaction(String transactionId) {
