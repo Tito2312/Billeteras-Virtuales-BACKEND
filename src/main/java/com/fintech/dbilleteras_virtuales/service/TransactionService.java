@@ -16,9 +16,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class TransactionService {
 
-    private final NotificationService notificationService;
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     public Transaction findById(String id) {
         return transactionRepository.findById(id)
@@ -72,6 +72,18 @@ public class TransactionService {
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         notificationService.notificationTransaction(user.getEmail(), "TRANSFERENCIA", amount);
         return savedTransaction;
+    }
+
+    public Transaction transfer(String userId, String receiverUserId, String sourceWallet, String targetWallet,
+            double amount) {
+        Transaction transaction = new Transaction();
+        transaction.setUserId(userId);
+        transaction.setReceiverUserId(receiverUserId);
+        transaction.setSourceWallet(sourceWallet);
+        transaction.setTargetWallet(targetWallet);
+        transaction.setAmount(amount);
+        transaction.setType(TransactionType.TRANSFER);
+        return transactionRepository.save(transaction);
     }
 
     public Transaction reverseTransaction(String transactionId) {

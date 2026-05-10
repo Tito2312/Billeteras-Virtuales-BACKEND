@@ -8,6 +8,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface TransactionRepository extends MongoRepository<Transaction, String> {
     List<Transaction> findByUserId(String userId);
-
+    List<Transaction> findByReceiverUserId(String receiverUserId);
     List<Transaction> findBySourceWalletOrTargetWallet(String sourceWallet, String targetWallet);
 }
