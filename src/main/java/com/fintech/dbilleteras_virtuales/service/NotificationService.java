@@ -36,8 +36,10 @@ public class NotificationService {
 
     public Notification notificationLowBalance(String email, String nombreBilletera, double saldo) {
 
-        String subject = "Billetera " + nombreBilletera + " con bajo saldo";
-        String message = "Recarga más saldo";
+        String subject = "⚠️ Alerta: Saldo bajo en tu billetera";
+        String message = "Hola,\n\nTu billetera \"" + nombreBilletera + "\" tiene un saldo actual de $"
+                + String.format("%.2f", saldo)
+                + ".\n\nTe recomendamos recargar saldo para evitar inconvenientes con tus transacciones.\n\nSaludos,\nEquipo de Billeteras Virtuales";
 
         return sendEmail(message, subject, email);
 
@@ -45,8 +47,9 @@ public class NotificationService {
 
     public Notification notificationTransaction(String email, String tipo, double saldo) {
 
-        String subject = "Transferencia de tipo " + tipo;
-        String message = "Transferencia de tipo " + tipo + " con saldo de " + saldo + " realizada";
+        String subject = "✅ Confirmación: " + tipo + " exitosa";
+        String message = "Hola,\n\nTu " + tipo.toLowerCase() + " por un monto de $" + String.format("%.2f", saldo)
+                + " ha sido procesada exitosamente.\n\nPuedes verificar el detalle de esta transacción en tu historial.\n\nSaludos,\nEquipo de Billeteras Virtuales";
 
         return sendEmail(message, subject, email);
 
@@ -54,8 +57,9 @@ public class NotificationService {
 
     public Notification rejetedTransaction(String email, String type) {
 
-        String subject = "SE HA RECHAZADO SU TRANSACCION";
-        String message = "La transaccion de tipo " + type + " ha sido rechazada";
+        String subject = "❌ Transacción rechazada";
+        String message = "Hola,\n\nLamentamos informarte que tu " + type.toLowerCase()
+                + " ha sido rechazada.\n\nPor favor verifica:\n- Que tienes saldo suficiente\n- Que la billetera destino existe y está activa\n- Que los datos de la transacción son correctos\n\nSi el problema persiste, contacta a soporte.\n\nSaludos,\nEquipo de Billeteras Virtuales";
 
         return sendEmail(message, subject, email);
 
