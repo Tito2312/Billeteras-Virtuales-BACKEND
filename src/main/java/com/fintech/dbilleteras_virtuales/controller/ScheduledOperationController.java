@@ -36,7 +36,7 @@ public class ScheduledOperationController {
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<List<ScheduledOperation>> findByUserId(@RequestParam String userId) {
+    public ResponseEntity<List<ScheduledOperation>> findByUserId(@PathVariable String userId) {
         return ResponseEntity.ok(scheduledOperationService.findByUser(userId));
     }
 
