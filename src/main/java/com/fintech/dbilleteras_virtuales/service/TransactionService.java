@@ -75,19 +75,7 @@ public class TransactionService {
         return savedTransaction;
     }
 
-    public Transaction transfer(String userId, String receiverUserId, String sourceWallet, String targetWallet,
-            double amount) {
-        Transaction transaction = new Transaction();
-        transaction.setUserId(userId);
-        transaction.setReceiverUserId(receiverUserId);
-        transaction.setSourceWallet(sourceWallet);
-        transaction.setTargetWallet(targetWallet);
-        transaction.setAmount(amount);
-        transaction.setType(TransactionType.TRANSFER);
-        return transactionRepository.save(transaction);
-    }
-
-    public Transaction transfer(String userId, String receiverUserId ,String sourceWallet, String targetWallet, double amount) {
+    public Transaction transfer(String userId, String receiverUserId, String sourceWallet, String targetWallet, double amount) {
         Transaction transaction = new Transaction();
         transaction.setUserId(userId);
         transaction.setReceiverUserId(receiverUserId);
