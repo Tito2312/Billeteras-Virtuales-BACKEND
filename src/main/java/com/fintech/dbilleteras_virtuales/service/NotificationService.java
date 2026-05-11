@@ -2,6 +2,7 @@ package com.fintech.dbilleteras_virtuales.service;
 
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.stereotype.Service;
 
 import com.fintech.dbilleteras_virtuales.model.Notification;
 import com.fintech.dbilleteras_virtuales.repository.NotificationRepository;
