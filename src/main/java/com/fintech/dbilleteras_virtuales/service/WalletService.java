@@ -10,6 +10,7 @@ import com.fintech.dbilleteras_virtuales.dto.WalletRequest;
 import com.fintech.dbilleteras_virtuales.model.Wallet;
 import com.fintech.dbilleteras_virtuales.repository.UserRepository;
 import com.fintech.dbilleteras_virtuales.repository.WalletRepository;
+import com.fintech.dbilleteras_virtuales.service.NotificationService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -19,6 +20,7 @@ public class WalletService {
 
     private final WalletRepository walletRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     public Wallet createWallet(WalletRequest request) {
         if (!userRepository.existsById(request.getUserId())) {
@@ -73,6 +75,14 @@ public class WalletService {
 
     public Double getBalance(String id, String userId) {
         Wallet wallet = findById(id, userId);
-        return wallet.getBalance();
+        double balance = wallet.getBalance();
+
+        if (balance < 100.0) {
+            var user = userRepository.findById(userId)
+                    .orElseThrow(() -> new IllegalArgumentException("User not found"));
+            notificationService.notificationLowBalance(user.getEmail(), wallet.getName(), balance);
+        }
+
+        return balance;
     }
 }

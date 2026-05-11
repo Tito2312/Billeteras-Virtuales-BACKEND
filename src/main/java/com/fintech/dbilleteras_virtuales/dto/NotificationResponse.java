@@ -6,10 +6,10 @@ import lombok.Data;
 
 @Data
 public class NotificationResponse {
-
+    private String id;
     private String asunto;
     private String message;
     private String email;
-    private LocalDate registrationDate = LocalDate.now();
+    private LocalDate registrationDate;
 
 }
