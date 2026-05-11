@@ -65,4 +65,11 @@ public class NotificationService {
 
     }
 
+    public Notification LevelUp(String email, String level, String beneficios) {
+        String subject = "HAS SUBIDO DE NIVEL";
+        String message = " Hola, has subido de nive, sigue recargando para seguir subiendo y tener mas beneficios "
+                + beneficios;
+        return sendEmail(message, subject, email);
+    }
+
 }

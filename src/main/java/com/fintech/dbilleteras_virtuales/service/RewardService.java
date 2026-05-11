@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 public class RewardService {
 
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
+    private final LevelBenefitService levelBenefitService;
 
     public int calculatePoints(TransactionType type, double amount) {
 
@@ -29,9 +31,19 @@ public class RewardService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
+        String oldLevel = user.getLevel();
+
         user.setPoints(user.getPoints() + points);
-        user.setLevel(calculateLevel(user.getPoints()));
+
+        String newLevel = calculateLevel(user.getPoints());
+        user.setLevel(newLevel);
         userRepository.save(user);
+
+        if (!oldLevel.equals(newLevel)) {
+            String benefits = levelBenefitService.getLevelBenefits(newLevel);
+            notificationService.LevelUp(user.getEmail(), newLevel, benefits);
+
+        }
     }
 
     public String calculateLevel(int points) {
