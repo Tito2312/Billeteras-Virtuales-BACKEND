@@ -66,11 +66,35 @@ public class NotificationService {
     }
 
     public Notification LevelUp(String email, String level, String beneficios) {
-        String subject = "HAS SUBIDO DE NIVEL";
-        String message = " Hola, has subido de nive " + level
+        String subject = "SE HA ACTUALIZADO TU NIVEL";
+        String message = " Hola, has actualizado tu nivel " + level
                 + ", sigue recargando para seguir subiendo y tener mas beneficios "
                 + beneficios;
         return sendEmail(message, subject, email);
+
+    }
+
+    public Notification TransactionReverse(String email, int puntos) {
+
+        String subject = "TRANSACCION REVERTIDA";
+        String message = " Hola, tu transaccion fue revertida, se te descontaron" + puntos + " puntos ";
+        return sendEmail(message, subject, email);
+
+    }
+
+    public Notification TransferNotification(String emailUser1, String name1, String emailUser2, String name2,
+            double amoutn) {
+
+        String subject1 = "TRANFERECNCIA EXITOSA";
+        String message1 = " Hola, ya hemos enviado en dinero a" + name2;
+
+        String subject2 = "FELICIDADES, TE HAN ENVIADO" + amoutn;
+        String message2 = " Hola, " + name1 + " te ha enviado " + amoutn + "";
+
+        sendEmail(message2, subject2, emailUser2);
+
+        return sendEmail(message1, subject1, emailUser1);
+
     }
 
 }

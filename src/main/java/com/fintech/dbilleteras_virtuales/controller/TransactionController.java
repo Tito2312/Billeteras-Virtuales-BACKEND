@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/transactions")
 @RequiredArgsConstructor
-public class TransactionController{
+public class TransactionController {
 
     private final TransactionService transactionService;
 
@@ -45,8 +45,9 @@ public class TransactionController{
     }
 
     @PutMapping("/reverseTransaction")
-    public ResponseEntity<Transaction> reverseTransaction(@RequestParam String transactionId) {
-        return ResponseEntity.ok(transactionService.reverseTransaction(transactionId));
+    public ResponseEntity<Transaction> reverseTransaction(@RequestParam String userId,
+            @RequestParam String transactionId) {
+        return ResponseEntity.ok(transactionService.reverseTransaction(userId, transactionId));
     }
 
     @GetMapping("/user/{userId}")
