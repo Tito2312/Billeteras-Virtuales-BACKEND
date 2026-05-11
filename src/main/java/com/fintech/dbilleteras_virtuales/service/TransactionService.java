@@ -5,10 +5,10 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.fintech.dbilleteras_virtuales.model.Transaction;
+import com.fintech.dbilleteras_virtuales.model.TransactionStatus;
 import com.fintech.dbilleteras_virtuales.model.TransactionType;
 import com.fintech.dbilleteras_virtuales.repository.TransactionRepository;
 import com.fintech.dbilleteras_virtuales.repository.UserRepository;
-import com.fintech.dbilleteras_virtuales.service.NotificationService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -19,6 +19,7 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
+    private final RewardService rewardService;
 
 
     public Transaction findById(String id){
@@ -36,7 +37,14 @@ public class TransactionService {
         transaction.setTargetWallet(targetWallet);
         transaction.setAmount(amount);
         transaction.setType(TransactionType.RECHARGE);
+        transaction.setStatus(TransactionStatus.COMPLETED);
+
+        int points = rewardService.calculatePoints(transaction.getType(), amount);
+        transaction.setPoints(points);
+
         Transaction savedTransaction = transactionRepository.save(transaction);
+
+        rewardService.updateUserPoints(userId, points);
 
         var user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
@@ -51,7 +59,14 @@ public class TransactionService {
         transaction.setSourceWallet(sourceWallet);
         transaction.setAmount(amount);
         transaction.setType(TransactionType.WITHDRAWAL);
+        transaction.setStatus(TransactionStatus.COMPLETED);
+
+        int points = rewardService.calculatePoints(transaction.getType(), amount);
+        transaction.setPoints(points);
+
         Transaction savedTransaction = transactionRepository.save(transaction);
+
+        rewardService.updateUserPoints(userId, points);
 
         var user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
@@ -67,7 +82,14 @@ public class TransactionService {
         transaction.setTargetWallet(targetWallet);
         transaction.setAmount(amount);
         transaction.setType(TransactionType.TRANSFER);
+        transaction.setStatus(TransactionStatus.COMPLETED);
+
+        int points = rewardService.calculatePoints(transaction.getType(), amount);
+        transaction.setPoints(points);
+
         Transaction savedTransaction = transactionRepository.save(transaction);
+
+        rewardService.updateUserPoints(userId, points);
 
         var user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
@@ -83,12 +105,33 @@ public class TransactionService {
         transaction.setTargetWallet(targetWallet);
         transaction.setAmount(amount);
         transaction.setType(TransactionType.TRANSFER);
-        return transactionRepository.save(transaction);
+        transaction.setStatus(TransactionStatus.COMPLETED);
+        
+        int points = rewardService.calculatePoints(transaction.getType(), amount);
+        transaction.setPoints(points);
+
+        Transaction savedTransaction = transactionRepository.save(transaction);
+
+        rewardService.updateUserPoints(userId, points);
+
+        var user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        notificationService.notificationTransaction(user.getEmail(), "TRANSFERENCIA", amount);
+        return savedTransaction;
     }
 
     public Transaction reverseTransaction(String transactionId) {
         Transaction transaction = findById(transactionId);
+
+        if (transaction.getStatus() == TransactionStatus.REVERSED) {
+            throw new RuntimeException("La transacción ya fue revertida");
+        }
+
         transaction.setReversed(true);
+        transaction.setStatus(TransactionStatus.REVERSED);
+
+        rewardService.updateUserPoints(transaction.getUserId(), -transaction.getPoints());
+
         return transactionRepository.save(transaction);
     }
 
