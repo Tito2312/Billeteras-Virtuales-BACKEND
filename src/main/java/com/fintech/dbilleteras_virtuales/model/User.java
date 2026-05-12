@@ -37,7 +37,8 @@ public class User implements UserDetails {
     private int points;
     private String level = "Bronze";
     private LocalDate registrationDate = LocalDate.now();
-    private boolean isActive = true;
+    private boolean isActive = false;
+    private String verificationToken;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -68,4 +69,5 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return isActive();
     }
+
 }

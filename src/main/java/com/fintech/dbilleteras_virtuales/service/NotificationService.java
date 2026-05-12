@@ -8,6 +8,7 @@ import com.fintech.dbilleteras_virtuales.model.Notification;
 import com.fintech.dbilleteras_virtuales.repository.NotificationRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.Value;
 
 @Service
 @RequiredArgsConstructor
@@ -57,9 +58,9 @@ public class NotificationService {
 
     public Notification rejetedTransaction(String email, String type) {
 
-        String subject = "❌ Transacción rechazada";
-        String message = "Hola,\n\nLamentamos informarte que tu " + type.toLowerCase()
-                + " ha sido rechazada.\n\nPor favor verifica:\n- Que tienes saldo suficiente\n- Que la billetera destino existe y está activa\n- Que los datos de la transacción son correctos\n\nSi el problema persiste, contacta a soporte.\n\nSaludos,\nEquipo de Billeteras Virtuales";
+        String subject = " Transacción rechazada";
+        String message = "Hola,Lamentamos informarte que tu " + type.toLowerCase()
+                + " ha sido rechazada.Por favor verifica:- Que tienes saldo suficiente o que la billetera destino existe y está activa\n- Que los datos de la transacción son correctos\n\nSi el problema persiste, contacta a soporte.\n\nSaludos,\nEquipo de Billeteras Virtuales";
 
         return sendEmail(message, subject, email);
 
@@ -95,6 +96,19 @@ public class NotificationService {
 
         return sendEmail(message1, subject1, emailUser1);
 
+    }
+
+    public Notification sendVerificationEmail(String email, String token) {
+        String link = "http://localhost:8080/api/auth/verify-email?token=" + token;
+
+        String subject = "Verifica tu cuenta - Billeteras Virtuales";
+        String message = "Hola,\n\n" +
+                "Gracias por registrarte. Haz click en el siguiente enlace para activar tu cuenta:\n\n" +
+                link + "\n\n" +
+                "Este enlace es de un solo uso.\n\n" +
+                "Si no creaste esta cuenta, ignora este mensaje.";
+
+        return sendEmail(message, subject, email);
     }
 
 }
