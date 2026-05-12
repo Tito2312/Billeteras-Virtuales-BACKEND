@@ -44,6 +44,13 @@ public class TransactionController {
         return ResponseEntity.ok(transactionService.transfer(userId, sourceWallet, targetWallet, amount));
     }
 
+    @PostMapping("/transfer-to-user")
+    public ResponseEntity<Transaction> transferToUser(@RequestParam String userId, @RequestParam String receiverUserId,
+            @RequestParam String sourceWallet, @RequestParam String targetWallet, @RequestParam double amount) {
+        return ResponseEntity
+                .ok(transactionService.transfer(userId, receiverUserId, sourceWallet, targetWallet, amount));
+    }
+
     @PutMapping("/reverseTransaction")
     public ResponseEntity<Transaction> reverseTransaction(@RequestParam String userId,
             @RequestParam String transactionId) {

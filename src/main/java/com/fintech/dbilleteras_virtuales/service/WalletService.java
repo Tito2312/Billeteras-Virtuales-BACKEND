@@ -85,4 +85,42 @@ public class WalletService {
 
         return balance;
     }
+
+    public boolean hasSufficientBalance(String walletId, String userId, double amount) {
+        Wallet wallet = findById(walletId, userId);
+        return wallet.getBalance() >= amount && wallet.isActive();
+    }
+
+    public Wallet updateBalance(String walletId, String userId, double amount) {
+        Wallet wallet = findById(walletId, userId);
+
+        if (!wallet.isActive()) {
+            throw new RuntimeException("La billetera está inactiva");
+        }
+
+        double newBalance = wallet.getBalance() + amount;
+
+        if (newBalance < 0) {
+            throw new RuntimeException("Saldo insuficiente");
+        }
+
+        wallet.setBalance(newBalance);
+        return walletRepository.save(wallet);
+    }
+
+    public Wallet validateWalletExists(String walletId, String userId) {
+        Wallet wallet = findById(walletId, userId);
+        if (!wallet.isActive()) {
+            throw new RuntimeException("La billetera está inactiva");
+        }
+        return wallet;
+    }
+
+    public Wallet validateWalletExistsForOwner(String walletId, String ownerId) {
+        Wallet wallet = findById(walletId, ownerId);
+        if (!wallet.isActive()) {
+            throw new RuntimeException("La billetera está inactiva");
+        }
+        return wallet;
+    }
 }

@@ -13,7 +13,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ScheduledOperation {
-    
+
     @Id
     private String id;
 
@@ -25,6 +25,8 @@ public class ScheduledOperation {
     private double amount;
     private LocalDateTime scheduledDate;
     private boolean executed;
+    private ScheduledOperationStatus status = ScheduledOperationStatus.PENDING;
+    private String errorMessage;
     private LocalDateTime createdAt;
 
 }
