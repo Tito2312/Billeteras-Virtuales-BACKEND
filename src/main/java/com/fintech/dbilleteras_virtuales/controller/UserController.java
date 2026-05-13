@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fintech.dbilleteras_virtuales.dto.UpdatedUserDto;
 import com.fintech.dbilleteras_virtuales.model.User;
 import com.fintech.dbilleteras_virtuales.service.UserService;
 
@@ -36,18 +37,27 @@ public class UserController {
         return ResponseEntity.ok(userService.findAll());
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(
-            @PathVariable String id,
-            @RequestBody @Valid User updatedUser,
-            @AuthenticationPrincipal UserDetails currentUser) {
+   @PutMapping("/{id}")
+public ResponseEntity<User> updateUser(
+        @PathVariable String id,
+        @RequestBody @Valid UpdatedUserDto updatedUser,
+        @AuthenticationPrincipal UserDetails currentUser) {
 
-        // Verificar que el usuario solo pueda modificar su propio perfil
-        if (!currentUser.getUsername().equals(updatedUser.getEmail())) {
-            return ResponseEntity.status(403).build();
-        }
-        return ResponseEntity.ok(userService.updateUser(id, updatedUser));
+    // Normalizar emails (trim y lowerCase)
+    String tokenEmail = currentUser.getUsername().trim().toLowerCase();
+    String requestEmail = updatedUser.getEmail().trim().toLowerCase();
+
+    if (!tokenEmail.equals(requestEmail)) {
+        return ResponseEntity.status(403).body(null);
     }
+
+    User user = userService.findById(id);
+    user.setName(updatedUser.getName());
+    user.setPhoneNumber(updatedUser.getPhoneNumber());
+    user.setEmail(updatedUser.getEmail());
+
+    return ResponseEntity.ok(userService.updateUser(id, user));
+}
 
     @PatchMapping("/{id}/activate")
     public ResponseEntity<User> activate(@PathVariable String id) {
