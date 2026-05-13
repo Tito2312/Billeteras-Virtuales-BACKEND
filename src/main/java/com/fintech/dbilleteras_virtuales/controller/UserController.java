@@ -3,6 +3,8 @@ package com.fintech.dbilleteras_virtuales.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,7 +37,15 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable String id, @RequestBody @Valid User updatedUser) {
+    public ResponseEntity<User> updateUser(
+            @PathVariable String id,
+            @RequestBody @Valid User updatedUser,
+            @AuthenticationPrincipal UserDetails currentUser) {
+
+        // Verificar que el usuario solo pueda modificar su propio perfil
+        if (!currentUser.getUsername().equals(updatedUser.getEmail())) {
+            return ResponseEntity.status(403).build();
+        }
         return ResponseEntity.ok(userService.updateUser(id, updatedUser));
     }
 

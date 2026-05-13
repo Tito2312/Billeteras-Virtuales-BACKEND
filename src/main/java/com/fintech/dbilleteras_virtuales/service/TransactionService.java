@@ -9,6 +9,7 @@ import com.fintech.dbilleteras_virtuales.model.TransactionStatus;
 import com.fintech.dbilleteras_virtuales.model.TransactionType;
 import com.fintech.dbilleteras_virtuales.repository.TransactionRepository;
 import com.fintech.dbilleteras_virtuales.repository.UserRepository;
+import com.fintech.dbilleteras_virtuales.dataStructure.Cola;
 
 import lombok.RequiredArgsConstructor;
 
@@ -321,6 +322,19 @@ public class TransactionService {
 
     public List<Transaction> getHistoryByWalletId(String walletId) {
         return transactionRepository.findBySourceWalletOrTargetWallet(walletId, walletId);
+    }
+
+    public Cola<Transaction> encolarTransaccionRevertir(String userid) {
+
+        List<Transaction> transacciones = transactionRepository.findByUserIdOrderByFecha(userid);
+
+        Cola<Transaction> colaTransacciones = new Cola<>();
+
+        for (Transaction t : transacciones) {
+            colaTransacciones.encolar(t);
+
+        }
+
     }
 
 }
