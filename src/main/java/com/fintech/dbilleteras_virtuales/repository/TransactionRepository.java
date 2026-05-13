@@ -2,6 +2,7 @@ package com.fintech.dbilleteras_virtuales.repository;
 
 import com.fintech.dbilleteras_virtuales.model.Transaction;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -13,5 +14,12 @@ public interface TransactionRepository extends MongoRepository<Transaction, Stri
 
     List<Transaction> findBySourceWalletOrTargetWallet(String sourceWallet, String targetWallet);
 
-    List<Transaction> findByUserIdOrderByFecha(String userId);
+    List<Transaction> findByUserIdOrderByFechaAsc(String userId);
+
+    List<Transaction> findBySourceWalletOrderByCreatedAtAsc(String sourceWallet);
+
+    List<Transaction> findBySourceWalletAndCreatedAtBetweenOrderByCreatedAtAsc(
+            String sourceWallet,
+            LocalDateTime inicio,
+            LocalDateTime fin);
 }

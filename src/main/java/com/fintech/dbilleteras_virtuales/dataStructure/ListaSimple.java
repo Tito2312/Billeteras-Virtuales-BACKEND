@@ -90,4 +90,32 @@ public class ListaSimple<T> {
     public int getTamaño() {
         return tamaño;
     }
+
+    public T buscarPorValor(T valor) {
+        NodoLista<T> actual = primerNodoLista;
+
+        while (actual != null) {
+            if (actual.getValorNodo().equals(valor)) {
+                return actual.getValorNodo();
+            }
+            actual = actual.getSiguienteNodo();
+        }
+
+        return null;
+    }
+
+    public T buscarPorId(String id) {
+        NodoLista<T> actual = primerNodoLista;
+
+        while (actual != null) {
+
+            if (actual.getValorNodo().toString().contains(id)) {
+                return actual.getValorNodo();
+            }
+            actual = actual.getSiguienteNodo();
+        }
+
+        return null;
+    }
+
 }

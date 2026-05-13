@@ -1,7 +1,11 @@
 package com.fintech.dbilleteras_virtuales.service;
 
+import java.lang.reflect.Array;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.fintech.dbilleteras_virtuales.model.Transaction;
@@ -9,7 +13,9 @@ import com.fintech.dbilleteras_virtuales.model.TransactionStatus;
 import com.fintech.dbilleteras_virtuales.model.TransactionType;
 import com.fintech.dbilleteras_virtuales.repository.TransactionRepository;
 import com.fintech.dbilleteras_virtuales.repository.UserRepository;
-import com.fintech.dbilleteras_virtuales.dataStructure.Cola;
+import com.fintech.dbilleteras_virtuales.dataStructure.Pila;
+import com.fintech.dbilleteras_virtuales.dataStructure.ListaSimple;
+import com.fintech.dbilleteras_virtuales.dataStructure.NodoLista;
 
 import lombok.RequiredArgsConstructor;
 
@@ -324,17 +330,102 @@ public class TransactionService {
         return transactionRepository.findBySourceWalletOrTargetWallet(walletId, walletId);
     }
 
-    public Cola<Transaction> encolarTransaccionRevertir(String userid) {
+    public Pila<Transaction> apilarTransaccionRevertir(String userid) {
 
-        List<Transaction> transacciones = transactionRepository.findByUserIdOrderByFecha(userid);
+        List<Transaction> transactions = transactionRepository.findByUserIdOrderByFechaAsc(userid);
 
-        Cola<Transaction> colaTransacciones = new Cola<>();
+        Pila<Transaction> pilaTransactions = new Pila<>();
 
-        for (Transaction t : transacciones) {
-            colaTransacciones.encolar(t);
+        for (Transaction t : transactions) {
+            pilaTransactions.apilar(t);
 
         }
 
+        return pilaTransactions;
+
+    }
+
+    public List ListTransactions(String userId) {
+
+        ListaSimple<Transaction> listaTransactions = historyTransactions(userId);
+
+        List<Transaction> resultado = new ArrayList<>();
+        NodoLista<Transaction> actual = listaTransactions.primerNodoLista;
+
+        while (actual != null) {
+            resultado.add(actual.getValorNodo());
+            actual = actual.getSiguienteNodo();
+        }
+
+        return resultado;
+
+    }
+
+    public ListaSimple<Transaction> historyTransactions(String userid) {
+
+        List<Transaction> transactions = transactionRepository.findByUserIdOrderByFechaAsc(userid);
+
+        ListaSimple<Transaction> ListaTransactions = new ListaSimple<>();
+
+        for (Transaction t : transactions) {
+            ListaTransactions.agregar(t);
+
+        }
+
+        return ListaTransactions;
+
+    }
+
+    public Transaction reverseTransactionPila(String userId) {
+
+        Pila<Transaction> transactions = apilarTransaccionRevertir(userId);
+
+        if (!transactions.estaVacia()) {
+            return null;
+        }
+
+        Transaction Lasttransaction = transactions.desapilar();
+
+        Transaction revertida = reverseTransaction(userId, Lasttransaction.getId());
+
+        return revertida;
+
+    }
+
+    public Transaction reverseTransactionList(String userId, String transactionId) {
+
+        ListaSimple<Transaction> transactions = historyTransactions(userId);
+
+        if (transactions.estaVacia()) {
+            return null;
+
+        }
+
+        Transaction transactionReverse = transactions.buscarPorId(transactionId);
+
+        Transaction reverse = reverseTransaction(userId, transactionReverse.getId());
+
+        return reverse;
+
+    }
+
+    public List<Transaction> listWalletsTransactions(String walletId) {
+
+        List<Transaction> transactionsWallet = transactionRepository.findBySourceWalletOrderByCreatedAtAsc(walletId);
+
+        return transactionsWallet;
+
+    }
+
+    public List<Transaction> getTransactionsByWalletAndDateRange(String walletId, String inicio, String fin) {
+
+        LocalDateTime dateFist = LocalDateTime.parse(inicio);
+        LocalDateTime dateLast = LocalDateTime.parse(fin);
+
+        List<Transaction> transactionsDateRange = transactionRepository
+                .findBySourceWalletAndCreatedAtBetweenOrderByCreatedAtAsc(walletId, dateFist, dateLast);
+
+        return transactionsDateRange;
     }
 
 }
