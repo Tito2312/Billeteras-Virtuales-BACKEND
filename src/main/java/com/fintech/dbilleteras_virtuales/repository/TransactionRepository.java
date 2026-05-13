@@ -14,7 +14,7 @@ public interface TransactionRepository extends MongoRepository<Transaction, Stri
 
     List<Transaction> findBySourceWalletOrTargetWallet(String sourceWallet, String targetWallet);
 
-    List<Transaction> findByUserIdOrderByFechaAsc(String userId);
+    List<Transaction> findByUserIdOrderByCreatedAtAsc(String userId);
 
     List<Transaction> findBySourceWalletOrderByCreatedAtAsc(String sourceWallet);
 

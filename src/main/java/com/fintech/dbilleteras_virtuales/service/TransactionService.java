@@ -332,7 +332,7 @@ public class TransactionService {
 
     public Pila<Transaction> apilarTransaccionRevertir(String userid) {
 
-        List<Transaction> transactions = transactionRepository.findByUserIdOrderByFechaAsc(userid);
+        List<Transaction> transactions = transactionRepository.findByUserIdOrderByCreatedAtAsc(userid);
 
         Pila<Transaction> pilaTransactions = new Pila<>();
 
@@ -363,7 +363,7 @@ public class TransactionService {
 
     public ListaSimple<Transaction> historyTransactions(String userid) {
 
-        List<Transaction> transactions = transactionRepository.findByUserIdOrderByFechaAsc(userid);
+        List<Transaction> transactions = transactionRepository.findByUserIdOrderByCreatedAtAsc(userid);
 
         ListaSimple<Transaction> ListaTransactions = new ListaSimple<>();
 
