@@ -54,6 +54,7 @@
                 transaction.setUserId(userId);
                 transaction.setTargetWallet(targetWallet);
                 transaction.setAmount(amount);
+                transaction.setCreatedAt(LocalDateTime.now());
                 transaction.setType(TransactionType.RECHARGE);
                 transaction.setStatus(TransactionStatus.COMPLETED);
 
@@ -75,6 +76,7 @@
                 failedTransaction.setUserId(userId);
                 failedTransaction.setTargetWallet(targetWallet);
                 failedTransaction.setAmount(amount);
+                failedTransaction.setCreatedAt(LocalDateTime.now());
                 failedTransaction.setType(TransactionType.RECHARGE);
                 failedTransaction.setStatus(TransactionStatus.FAILED);
                 failedTransaction.setPoints(0);
@@ -114,6 +116,7 @@
                 transaction.setUserId(userId);
                 transaction.setSourceWallet(sourceWallet);
                 transaction.setAmount(amount);
+                transaction.setCreatedAt(LocalDateTime.now());
                 transaction.setType(TransactionType.WITHDRAWAL);
                 transaction.setStatus(TransactionStatus.COMPLETED);
 
@@ -135,6 +138,7 @@
                 failedTransaction.setUserId(userId);
                 failedTransaction.setSourceWallet(sourceWallet);
                 failedTransaction.setAmount(amount);
+                failedTransaction.setCreatedAt(LocalDateTime.now());
                 failedTransaction.setType(TransactionType.WITHDRAWAL);
                 failedTransaction.setStatus(TransactionStatus.FAILED);
                 failedTransaction.setPoints(0);
@@ -180,6 +184,7 @@
                 transaction.setSourceWallet(sourceWallet);
                 transaction.setTargetWallet(targetWallet);
                 transaction.setAmount(amount);
+                transaction.setCreatedAt(LocalDateTime.now());
                 transaction.setType(TransactionType.TRANSFER);
                 transaction.setStatus(TransactionStatus.COMPLETED);
 
@@ -202,6 +207,7 @@
                 failedTransaction.setSourceWallet(sourceWallet);
                 failedTransaction.setTargetWallet(targetWallet);
                 failedTransaction.setAmount(amount);
+                failedTransaction.setCreatedAt(LocalDateTime.now());
                 failedTransaction.setType(TransactionType.TRANSFER);
                 failedTransaction.setStatus(TransactionStatus.FAILED);
                 failedTransaction.setPoints(0);
@@ -257,6 +263,7 @@
                 transaction.setSourceWallet(sourceWallet);
                 transaction.setTargetWallet(targetWallet);
                 transaction.setAmount(amount);
+                transaction.setCreatedAt(LocalDateTime.now());
                 transaction.setType(TransactionType.TRANSFER);
                 transaction.setStatus(TransactionStatus.COMPLETED);
 
@@ -281,6 +288,7 @@
                 failedTransaction.setSourceWallet(sourceWallet);
                 failedTransaction.setTargetWallet(targetWallet);
                 failedTransaction.setAmount(amount);
+                failedTransaction.setCreatedAt(LocalDateTime.now());
                 failedTransaction.setType(TransactionType.TRANSFER);
                 failedTransaction.setStatus(TransactionStatus.FAILED);
                 failedTransaction.setPoints(0);
