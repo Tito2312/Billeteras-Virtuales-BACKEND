@@ -118,4 +118,8 @@ public class ListaSimple<T> {
         return null;
     }
 
+    public NodoLista<T> firtNodo() {
+        return primerNodoLista;
+    }
+
 }

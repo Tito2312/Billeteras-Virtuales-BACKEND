@@ -16,14 +16,14 @@ import lombok.RequiredArgsConstructor;
 public class NotificationService {
 
     private static final Logger logger = LoggerFactory.getLogger(NotificationService.class);
-    
+
     private final JavaMailSender mailSender;
     private final NotificationRepository notificationRepository;
 
     public Notification sendEmail(String message, String subject, String addressee) {
         logger.info("📧 Intentando enviar email a: {}", addressee);
         logger.info("📧 Asunto: {}", subject);
-        
+
         try {
             SimpleMailMessage correo = new SimpleMailMessage();
             correo.setTo(addressee);
@@ -41,7 +41,7 @@ public class NotificationService {
                     .build();
 
             return notificationRepository.save(notification);
-            
+
         } catch (Exception e) {
             logger.error("❌ Error al enviar email a {}: {}", addressee, e.getMessage());
             logger.error("❌ Detalle del error: ", e);
@@ -81,16 +81,20 @@ public class NotificationService {
 
     public Notification TransactionReverse(String email, int puntos) {
         String subject = "🔄 TRANSACCIÓN REVERTIDA";
-        String message = "Hola,\n\nTu transacción fue revertida exitosamente.\n\nSe te descontaron " + puntos + " puntos.\n\nSaludos,\nEquipo de Billeteras Virtuales";
+        String message = "Hola,\n\nTu transacción fue revertida exitosamente.\n\nSe te descontaron " + puntos
+                + " puntos.\n\nSaludos,\nEquipo de Billeteras Virtuales";
         return sendEmail(message, subject, email);
     }
 
-    public Notification TransferNotification(String emailUser1, String name1, String emailUser2, String name2, double amount) {
+    public Notification TransferNotification(String emailUser1, String name1, String emailUser2, String name2,
+            double amount) {
         String subject1 = "✅ TRANSFERENCIA EXITOSA";
-        String message1 = "Hola " + name1 + ",\n\nHas transferido $" + String.format("%.2f", amount) + " a " + name2 + " exitosamente.\n\nSaludos,\nEquipo de Billeteras Virtuales";
+        String message1 = "Hola " + name1 + ",\n\nHas transferido $" + String.format("%.2f", amount) + " a " + name2
+                + " exitosamente.\n\nSaludos,\nEquipo de Billeteras Virtuales";
 
         String subject2 = "💰 HAS RECIBIDO UNA TRANSFERENCIA";
-        String message2 = "Hola " + name2 + ",\n\nHas recibido $" + String.format("%.2f", amount) + " de " + name1 + ".\n\nSaludos,\nEquipo de Billeteras Virtuales";
+        String message2 = "Hola " + name2 + ",\n\nHas recibido $" + String.format("%.2f", amount) + " de " + name1
+                + ".\n\nSaludos,\nEquipo de Billeteras Virtuales";
 
         sendEmail(message2, subject2, emailUser2);
         return sendEmail(message1, subject1, emailUser1);
@@ -109,6 +113,12 @@ public class NotificationService {
                 "Saludos,\nEquipo de FinWallet";
 
         logger.info("📧 Enviando email de verificación a: {} con token: {}", email, token);
+        return sendEmail(message, subject, email);
+    }
+
+    public Notification anomalyDetection(String email) {
+        String subject = "🔄 TRANSACCIÓN SOSPECHOSA";
+        String message = "Hola,\n\nHicieste una Transaccion sospechosa, su monto fue mayor al promedio de las otras ";
         return sendEmail(message, subject, email);
     }
 }
