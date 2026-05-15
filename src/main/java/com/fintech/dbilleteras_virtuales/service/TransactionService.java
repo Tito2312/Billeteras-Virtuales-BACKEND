@@ -1,44 +1,74 @@
-    package com.fintech.dbilleteras_virtuales.service;
+package com.fintech.dbilleteras_virtuales.service;
 
-    import java.lang.reflect.Array;
-    import java.time.LocalDateTime;
-    import java.util.ArrayList;
-    import java.util.List;
+import java.lang.reflect.Array;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
-    import org.springframework.http.ResponseEntity;
-    import org.springframework.stereotype.Service;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 
-    import com.fintech.dbilleteras_virtuales.model.Transaction;
-    import com.fintech.dbilleteras_virtuales.model.TransactionStatus;
-    import com.fintech.dbilleteras_virtuales.model.TransactionType;
-    import com.fintech.dbilleteras_virtuales.repository.TransactionRepository;
-    import com.fintech.dbilleteras_virtuales.repository.UserRepository;
-    import com.fintech.dbilleteras_virtuales.dataStructure.Pila;
-    import com.fintech.dbilleteras_virtuales.dataStructure.ListaSimple;
-    import com.fintech.dbilleteras_virtuales.dataStructure.NodoLista;
+import com.fintech.dbilleteras_virtuales.model.Transaction;
 
-    import lombok.RequiredArgsConstructor;
+import com.fintech.dbilleteras_virtuales.model.TransactionStatus;
+import com.fintech.dbilleteras_virtuales.service.LevelBenefitService;
+import com.fintech.dbilleteras_virtuales.model.TransactionType;
+import com.fintech.dbilleteras_virtuales.repository.TransactionRepository;
+import com.fintech.dbilleteras_virtuales.repository.UserRepository;
+import com.fintech.dbilleteras_virtuales.dataStructure.Pila;
+import com.fintech.dbilleteras_virtuales.dataStructure.ListaSimple;
+import com.fintech.dbilleteras_virtuales.dataStructure.NodoLista;
 
-    @Service
-    @RequiredArgsConstructor
-    public class TransactionService {
+import lombok.RequiredArgsConstructor;
 
-        private final TransactionRepository transactionRepository;
-        private final UserRepository userRepository;
-        private final NotificationService notificationService;
-        private final RewardService rewardService;
-        private final WalletService walletService;
+@Service
+@RequiredArgsConstructor
+public class TransactionService {
 
-        public Transaction findById(String id) {
-            return transactionRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Transacción no encontrada"));
+    private final TransactionRepository transactionRepository;
+    private final UserRepository userRepository;
+    private final NotificationService notificationService;
+    private final LevelBenefitService levelBenefitService;
+    private final RewardService rewardService;
+    private final WalletService walletService;
+
+    public Transaction findById(String id) {
+        return transactionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Transacción no encontrada"));
+    }
+
+    public List<Transaction> findAll() {
+        return transactionRepository.findAll();
+    }
+
+    public boolean validateTransaction(String userId) {
+
+        LocalDate today = LocalDate.now();
+        LocalDateTime startDay = today.atStartOfDay();
+        LocalDateTime finalDay = today.atTime(LocalTime.MAX);
+
+        var user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        List<Transaction> listTransactionsToday = transactionRepository
+                .findBySourceWalletAndCreatedAtBetweenOrderByCreatedAtAsc(userId, startDay, finalDay);
+
+        int size = listTransactionsToday.size();
+
+        int limite = levelBenefitService.getDailyTransactionLimit(user.getLevel());
+
+        if (size < limite) {
+            return true;
+
         }
+        return false;
 
-        public List<Transaction> findAll() {
-            return transactionRepository.findAll();
-        }
+    }
 
-        public Transaction recharge(String userId, String targetWallet, double amount) {
+    public Transaction recharge(String userId, String targetWallet, double amount) {
+        if (validateTransaction(userId)) {
             try {
 
                 if (amount <= 0) {
@@ -94,9 +124,15 @@
 
                 throw new RuntimeException("Recarga fallida: " + e.getMessage());
             }
-        }
 
-        public Transaction withdrawal(String userId, String sourceWallet, double amount) {
+        }
+        throw new RuntimeException("Sin transacciones disponibles, intenlo mañana : ");
+
+    }
+
+    public Transaction withdrawal(String userId, String sourceWallet, double amount) {
+
+        if (validateTransaction(userId)) {
             try {
 
                 if (amount <= 0) {
@@ -156,9 +192,14 @@
 
                 throw new RuntimeException("Retiro fallido: " + e.getMessage());
             }
-        }
 
-        public Transaction transfer(String userId, String sourceWallet, String targetWallet, double amount) {
+        }
+        throw new RuntimeException("Sin transacciones disponibles, intenlo mañana : ");
+
+    }
+
+    public Transaction transfer(String userId, String sourceWallet, String targetWallet, double amount) {
+        if (validateTransaction(userId)) {
             try {
 
                 if (amount <= 0) {
@@ -225,10 +266,15 @@
 
                 throw new RuntimeException("Transferencia fallida: " + e.getMessage());
             }
-        }
 
-        public Transaction transfer(String userId, String receiverUserId, String sourceWallet, String targetWallet,
-                double amount) {
+        }
+        throw new RuntimeException("Transferencia fallida: ");
+
+    }
+
+    public Transaction transfer(String userId, String receiverUserId, String sourceWallet, String targetWallet,
+            double amount) {
+        if (validateTransaction(userId)) {
             try {
 
                 if (amount <= 0) {
@@ -276,7 +322,8 @@
                 walletService.updateBalance(targetWallet, receiverUserId, amount);
 
                 rewardService.updateUserPoints(userId, points);
-                notificationService.TransferNotification(user.getEmail(), user.getName(), user2.getEmail(), user2.getName(),
+                notificationService.TransferNotification(user.getEmail(), user.getName(), user2.getEmail(),
+                        user2.getName(),
                         amount);
                 return savedTransaction;
 
@@ -306,140 +353,145 @@
 
                 throw new RuntimeException("Transferencia fallida: " + e.getMessage());
             }
+
         }
 
-        public Transaction reverseTransaction(String userId, String transactionId) {
-    Transaction transaction = findById(transactionId);
-
-    if (transaction.getStatus() == TransactionStatus.REVERSED) {
-        throw new RuntimeException("La transacción ya fue revertida");
+        throw new RuntimeException("Transferencia fallida: ");
     }
 
-    walletService.updateBalance(transaction.getSourceWallet(), userId, transaction.getAmount());
-    
-    if (transaction.getTargetWallet() != null) {
-        walletService.updateBalance(transaction.getTargetWallet(), transaction.getReceiverUserId(), -transaction.getAmount());
+    public Transaction reverseTransaction(String userId, String transactionId) {
+        Transaction transaction = findById(transactionId);
+
+        if (transaction.getStatus() == TransactionStatus.REVERSED) {
+            throw new RuntimeException("La transacción ya fue revertida");
+        }
+
+        walletService.updateBalance(transaction.getSourceWallet(), userId, transaction.getAmount());
+
+        if (transaction.getTargetWallet() != null) {
+            walletService.updateBalance(transaction.getTargetWallet(), transaction.getReceiverUserId(),
+                    -transaction.getAmount());
+        }
+
+        transaction.setReversed(true);
+        transaction.setStatus(TransactionStatus.REVERSED);
+
+        rewardService.updateUserPoints(transaction.getUserId(), -transaction.getPoints());
+
+        Transaction saveTransaction = transactionRepository.save(transaction);
+
+        var user = userRepository.findById(transaction.getUserId())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        notificationService.TransactionReverse(user.getEmail(), transaction.getPoints());
+
+        return saveTransaction;
     }
 
-    transaction.setReversed(true);
-    transaction.setStatus(TransactionStatus.REVERSED);
+    public List<Transaction> getHistoryByUserId(String userId) {
+        return transactionRepository.findByUserId(userId);
+    }
 
-    rewardService.updateUserPoints(transaction.getUserId(), -transaction.getPoints());
+    public List<Transaction> getHistoryByWalletId(String walletId) {
+        return transactionRepository.findBySourceWalletOrTargetWallet(walletId, walletId);
+    }
 
-    Transaction saveTransaction = transactionRepository.save(transaction);
+    public Pila<Transaction> apilarTransaccionRevertir(String userid) {
 
-    var user = userRepository.findById(transaction.getUserId())
-            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        List<Transaction> transactions = transactionRepository.findByUserIdOrderByCreatedAtAsc(userid);
 
-    notificationService.TransactionReverse(user.getEmail(), transaction.getPoints());
+        Pila<Transaction> pilaTransactions = new Pila<>();
 
-    return saveTransaction;
+        for (Transaction t : transactions) {
+            pilaTransactions.apilar(t);
+
+        }
+
+        return pilaTransactions;
+
+    }
+
+    public List ListTransactions(String userId) {
+
+        ListaSimple<Transaction> listaTransactions = historyTransactions(userId);
+
+        List<Transaction> resultado = new ArrayList<>();
+        NodoLista<Transaction> actual = listaTransactions.primerNodoLista;
+
+        while (actual != null) {
+            resultado.add(actual.getValorNodo());
+            actual = actual.getSiguienteNodo();
+        }
+
+        return resultado;
+
+    }
+
+    public ListaSimple<Transaction> historyTransactions(String userid) {
+
+        List<Transaction> transactions = transactionRepository.findByUserIdOrderByCreatedAtAsc(userid);
+
+        ListaSimple<Transaction> ListaTransactions = new ListaSimple<>();
+
+        for (Transaction t : transactions) {
+            ListaTransactions.agregar(t);
+
+        }
+
+        return ListaTransactions;
+
+    }
+
+    public Transaction reverseTransactionPila(String userId) {
+
+        Pila<Transaction> transactions = apilarTransaccionRevertir(userId);
+
+        if (!transactions.estaVacia()) {
+            return null;
+        }
+
+        Transaction Lasttransaction = transactions.desapilar();
+
+        Transaction revertida = reverseTransaction(userId, Lasttransaction.getId());
+
+        return revertida;
+
+    }
+
+    public Transaction reverseTransactionList(String userId, String transactionId) {
+
+        ListaSimple<Transaction> transactions = historyTransactions(userId);
+
+        if (transactions.estaVacia()) {
+            return null;
+
+        }
+
+        Transaction transactionReverse = transactions.buscarPorId(transactionId);
+
+        Transaction reverse = reverseTransaction(userId, transactionReverse.getId());
+
+        return reverse;
+
+    }
+
+    public List<Transaction> listWalletsTransactions(String walletId) {
+
+        List<Transaction> transactionsWallet = transactionRepository.findBySourceWalletOrderByCreatedAtAsc(walletId);
+
+        return transactionsWallet;
+
+    }
+
+    public List<Transaction> getTransactionsByWalletAndDateRange(String walletId, String inicio, String fin) {
+
+        LocalDateTime dateFist = LocalDateTime.parse(inicio);
+        LocalDateTime dateLast = LocalDateTime.parse(fin);
+
+        List<Transaction> transactionsDateRange = transactionRepository
+                .findBySourceWalletAndCreatedAtBetweenOrderByCreatedAtAsc(walletId, dateFist, dateLast);
+
+        return transactionsDateRange;
+    }
+
 }
-
-        public List<Transaction> getHistoryByUserId(String userId) {
-            return transactionRepository.findByUserId(userId);
-        }
-
-        public List<Transaction> getHistoryByWalletId(String walletId) {
-            return transactionRepository.findBySourceWalletOrTargetWallet(walletId, walletId);
-        }
-
-        public Pila<Transaction> apilarTransaccionRevertir(String userid) {
-
-            List<Transaction> transactions = transactionRepository.findByUserIdOrderByCreatedAtAsc(userid);
-
-            Pila<Transaction> pilaTransactions = new Pila<>();
-
-            for (Transaction t : transactions) {
-                pilaTransactions.apilar(t);
-
-            }
-
-            return pilaTransactions;
-
-        }
-
-        public List ListTransactions(String userId) {
-
-            ListaSimple<Transaction> listaTransactions = historyTransactions(userId);
-
-            List<Transaction> resultado = new ArrayList<>();
-            NodoLista<Transaction> actual = listaTransactions.primerNodoLista;
-
-            while (actual != null) {
-                resultado.add(actual.getValorNodo());
-                actual = actual.getSiguienteNodo();
-            }
-
-            return resultado;
-
-        }
-
-        public ListaSimple<Transaction> historyTransactions(String userid) {
-
-            List<Transaction> transactions = transactionRepository.findByUserIdOrderByCreatedAtAsc(userid);
-
-            ListaSimple<Transaction> ListaTransactions = new ListaSimple<>();
-
-            for (Transaction t : transactions) {
-                ListaTransactions.agregar(t);
-
-            }
-
-            return ListaTransactions;
-
-        }
-
-        public Transaction reverseTransactionPila(String userId) {
-
-            Pila<Transaction> transactions = apilarTransaccionRevertir(userId);
-
-            if (!transactions.estaVacia()) {
-                return null;
-            }
-
-            Transaction Lasttransaction = transactions.desapilar();
-
-            Transaction revertida = reverseTransaction(userId, Lasttransaction.getId());
-
-            return revertida;
-
-        }
-
-        public Transaction reverseTransactionList(String userId, String transactionId) {
-
-            ListaSimple<Transaction> transactions = historyTransactions(userId);
-
-            if (transactions.estaVacia()) {
-                return null;
-
-            }
-
-            Transaction transactionReverse = transactions.buscarPorId(transactionId);
-
-            Transaction reverse = reverseTransaction(userId, transactionReverse.getId());
-
-            return reverse;
-
-        }
-
-        public List<Transaction> listWalletsTransactions(String walletId) {
-
-            List<Transaction> transactionsWallet = transactionRepository.findBySourceWalletOrderByCreatedAtAsc(walletId);
-
-            return transactionsWallet;
-
-        }
-
-        public List<Transaction> getTransactionsByWalletAndDateRange(String walletId, String inicio, String fin) {
-
-            LocalDateTime dateFist = LocalDateTime.parse(inicio);
-            LocalDateTime dateLast = LocalDateTime.parse(fin);
-
-            List<Transaction> transactionsDateRange = transactionRepository
-                    .findBySourceWalletAndCreatedAtBetweenOrderByCreatedAtAsc(walletId, dateFist, dateLast);
-
-            return transactionsDateRange;
-        }
-
-    }
