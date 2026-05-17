@@ -1,6 +1,8 @@
-package com.fintech.dbilleteras_virtuales.financialBehaviorDetection;
+package com.fintech.dbilleteras_virtuales.service;
 
 import java.util.List;
+
+import org.springframework.stereotype.Service;
 
 import com.fintech.dbilleteras_virtuales.dataStructure.ListaSimple;
 import com.fintech.dbilleteras_virtuales.model.Transaction;
@@ -11,8 +13,9 @@ import com.fintech.dbilleteras_virtuales.service.NotificationService;
 
 import lombok.RequiredArgsConstructor;
 
+@Service
 @RequiredArgsConstructor
-public class TransactionAnalytics {
+public class TransactionAnalyticsService {
 
     public final TransactionRepository transactionRepository;
     public final UserRepository userRepository;
