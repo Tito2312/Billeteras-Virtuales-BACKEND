@@ -44,7 +44,7 @@ public class TransactionAnalytics {
         while (firstNode != null) {
 
             suma += firstNode.getValorNodo().getAmount();
-            firstNode.getSiguienteNodo();
+            firstNode = firstNode.getSiguienteNodo();
 
         }
 
