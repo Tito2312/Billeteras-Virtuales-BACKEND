@@ -4,11 +4,11 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.fintech.dbilleteras_virtuales.dataStructure.ListaSimple;
+import com.fintech.dbilleteras_virtuales.dataStructure.LinkedList;
 import com.fintech.dbilleteras_virtuales.model.Transaction;
 import com.fintech.dbilleteras_virtuales.repository.TransactionRepository;
 import com.fintech.dbilleteras_virtuales.repository.UserRepository;
-import com.fintech.dbilleteras_virtuales.dataStructure.NodoLista;
+import com.fintech.dbilleteras_virtuales.dataStructure.ListNode;
 import com.fintech.dbilleteras_virtuales.service.NotificationService;
 
 import lombok.RequiredArgsConstructor;
@@ -32,7 +32,7 @@ public class TransactionAnalyticsService {
 
         List<Transaction> list = historytransactions(userId);
 
-        ListaSimple<Transaction> transactionsListaSimple = new ListaSimple<>();
+        LinkedList<Transaction> transactionsListaSimple = new LinkedList<>();
 
         for (Transaction t : list) {
             transactionsListaSimple.agregar(t);
@@ -42,7 +42,7 @@ public class TransactionAnalyticsService {
         double suma = 0;
         int count = transactionsListaSimple.getTamaño();
 
-        NodoLista<Transaction> firstNode = transactionsListaSimple.firtNodo();
+        ListNode<Transaction> firstNode = transactionsListaSimple.firtNodo();
 
         while (firstNode != null) {
 

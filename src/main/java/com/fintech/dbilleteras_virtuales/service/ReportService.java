@@ -1,7 +1,7 @@
 package com.fintech.dbilleteras_virtuales.service;
 
-import com.fintech.dbilleteras_virtuales.dataStructure.ListaSimple;
-import com.fintech.dbilleteras_virtuales.dataStructure.NodoLista;
+import com.fintech.dbilleteras_virtuales.dataStructure.LinkedList;
+import com.fintech.dbilleteras_virtuales.dataStructure.ListNode;
 import com.fintech.dbilleteras_virtuales.dto.ReportDto;
 import com.fintech.dbilleteras_virtuales.model.Transaction;
 import com.fintech.dbilleteras_virtuales.model.TransactionType;
@@ -39,8 +39,8 @@ public class ReportService {
         }
     }
 
-    private ParConteo obtenerOCrear(ListaSimple<ParConteo> lista, String clave) {
-        NodoLista<ParConteo> nodo = lista.firtNodo();
+    private ParConteo obtenerOCrear(LinkedList<ParConteo> lista, String clave) {
+        ListNode<ParConteo> nodo = lista.firtNodo();
         while (nodo != null) {
             if (nodo.getValorNodo().clave.equals(clave)) {
                 return nodo.getValorNodo();
@@ -52,12 +52,12 @@ public class ReportService {
         return nuevo;
     }
 
-    private void ordenarPorConteoDesc(ListaSimple<ParConteo> lista) {
+    private void ordenarPorConteoDesc(LinkedList<ParConteo> lista) {
         if (lista.getTamaño() <= 1) return;
         boolean intercambio;
         do {
             intercambio = false;
-            NodoLista<ParConteo> nodo = lista.firtNodo();
+            ListNode<ParConteo> nodo = lista.firtNodo();
             while (nodo != null && nodo.getSiguienteNodo() != null) {
                 ParConteo actual = nodo.getValorNodo();
                 ParConteo siguiente = nodo.getSiguienteNodo().getValorNodo();
@@ -74,12 +74,12 @@ public class ReportService {
     public List<ReportDto.WalletUsageReport> getWalletsWithMostUsage(int topN) {
         List<Transaction> all = transactionRepository.findAll();
 
-        ListaSimple<Transaction> listaTx = new ListaSimple<>();
+        LinkedList<Transaction> listaTx = new LinkedList<>();
         for (Transaction t : all) listaTx.agregar(t);
 
-        ListaSimple<ParConteo> conteo = new ListaSimple<>();
+        LinkedList<ParConteo> conteo = new LinkedList<>();
 
-        NodoLista<Transaction> nodo = listaTx.firtNodo();
+        ListNode<Transaction> nodo = listaTx.firtNodo();
         while (nodo != null) {
             Transaction t = nodo.getValorNodo();
             if (t.getSourceWallet() != null) {
@@ -97,7 +97,7 @@ public class ReportService {
         ordenarPorConteoDesc(conteo);
 
         List<ReportDto.WalletUsageReport> resultado = new ArrayList<>();
-        NodoLista<ParConteo> nodoC = conteo.firtNodo();
+        ListNode<ParConteo> nodoC = conteo.firtNodo();
         int i = 0;
         while (nodoC != null && i < topN) {
             ParConteo p = nodoC.getValorNodo();
@@ -118,12 +118,12 @@ public class ReportService {
     public List<ReportDto.UserTransferReport> getUsersWithMostTransfers(int topN) {
         List<Transaction> transfers = transactionRepository.findByType(TransactionType.TRANSFER);
 
-        ListaSimple<Transaction> listaTx = new ListaSimple<>();
+        LinkedList<Transaction> listaTx = new LinkedList<>();
         for (Transaction t : transfers) listaTx.agregar(t);
 
-        ListaSimple<ParConteo> conteo = new ListaSimple<>();
+        LinkedList<ParConteo> conteo = new LinkedList<>();
 
-        NodoLista<Transaction> nodo = listaTx.firtNodo();
+        ListNode<Transaction> nodo = listaTx.firtNodo();
         while (nodo != null) {
             Transaction t = nodo.getValorNodo();
             ParConteo entrada = obtenerOCrear(conteo, t.getUserId());
@@ -135,7 +135,7 @@ public class ReportService {
         ordenarPorConteoDesc(conteo);
 
         List<ReportDto.UserTransferReport> resultado = new ArrayList<>();
-        NodoLista<ParConteo> nodoC = conteo.firtNodo();
+        ListNode<ParConteo> nodoC = conteo.firtNodo();
         int i = 0;
         while (nodoC != null && i < topN) {
             ParConteo p = nodoC.getValorNodo();
@@ -157,15 +157,15 @@ public class ReportService {
         List<Wallet> allWallets = walletRepository.findAll();
         List<Transaction> allTransactions = transactionRepository.findAll();
 
-        ListaSimple<Wallet> listaWallets = new ListaSimple<>();
+        LinkedList<Wallet> listaWallets = new LinkedList<>();
         for (Wallet w : allWallets) listaWallets.agregar(w);
 
-        ListaSimple<Transaction> listaTx = new ListaSimple<>();
+        LinkedList<Transaction> listaTx = new LinkedList<>();
         for (Transaction t : allTransactions) listaTx.agregar(t);
 
-        ListaSimple<ParConteo> conteoCategoria = new ListaSimple<>();
+        LinkedList<ParConteo> conteoCategoria = new LinkedList<>();
 
-        NodoLista<Transaction> nodoT = listaTx.firtNodo();
+        ListNode<Transaction> nodoT = listaTx.firtNodo();
         while (nodoT != null) {
             Transaction t = nodoT.getValorNodo();
             String tipo = resolverTipoWallet(listaWallets, t.getSourceWallet());
@@ -175,8 +175,8 @@ public class ReportService {
             nodoT = nodoT.getSiguienteNodo();
         }
 
-        ListaSimple<ParConteo> conteoBilleteras = new ListaSimple<>();
-        NodoLista<Wallet> nodoWC = listaWallets.firtNodo();
+        LinkedList<ParConteo> conteoBilleteras = new LinkedList<>();
+        ListNode<Wallet> nodoWC = listaWallets.firtNodo();
         while (nodoWC != null) {
             Wallet w = nodoWC.getValorNodo();
             ParConteo entrada = obtenerOCrear(conteoBilleteras, w.getType());
@@ -187,7 +187,7 @@ public class ReportService {
         ordenarPorConteoDesc(conteoCategoria);
 
         List<ReportDto.CategoryActivityReport> resultado = new ArrayList<>();
-        NodoLista<ParConteo> nodoC = conteoCategoria.firtNodo();
+        ListNode<ParConteo> nodoC = conteoCategoria.firtNodo();
         while (nodoC != null) {
             ParConteo p = nodoC.getValorNodo();
             long cantBilleteras = buscarConteo(conteoBilleteras, p.clave);
@@ -205,12 +205,12 @@ public class ReportService {
     public List<ReportDto.TransactionFrequencyReport> getTransactionFrequencyByType() {
         List<Transaction> all = transactionRepository.findAll();
 
-        ListaSimple<Transaction> listaTx = new ListaSimple<>();
+        LinkedList<Transaction> listaTx = new LinkedList<>();
         for (Transaction t : all) listaTx.agregar(t);
 
-        ListaSimple<ParConteo> conteo = new ListaSimple<>();
+        LinkedList<ParConteo> conteo = new LinkedList<>();
 
-        NodoLista<Transaction> nodo = listaTx.firtNodo();
+        ListNode<Transaction> nodo = listaTx.firtNodo();
         while (nodo != null) {
             Transaction t = nodo.getValorNodo();
             ParConteo entrada = obtenerOCrear(conteo, t.getType().name());
@@ -222,7 +222,7 @@ public class ReportService {
         ordenarPorConteoDesc(conteo);
 
         List<ReportDto.TransactionFrequencyReport> resultado = new ArrayList<>();
-        NodoLista<ParConteo> nodoC = conteo.firtNodo();
+        ListNode<ParConteo> nodoC = conteo.firtNodo();
         while (nodoC != null) {
             ParConteo p = nodoC.getValorNodo();
             resultado.add(ReportDto.TransactionFrequencyReport.builder()
@@ -238,13 +238,13 @@ public class ReportService {
     public ReportDto.DateRangeSummaryReport getTotalAmountInDateRange(LocalDateTime start, LocalDateTime end) {
         List<Transaction> transactions = transactionRepository.findByCreatedAtBetween(start, end);
 
-        ListaSimple<Transaction> listaTx = new ListaSimple<>();
+        LinkedList<Transaction> listaTx = new LinkedList<>();
         for (Transaction t : transactions) listaTx.agregar(t);
 
         double totalMonto = 0;
-        ListaSimple<ParConteo> conteoTipo = new ListaSimple<>();
+        LinkedList<ParConteo> conteoTipo = new LinkedList<>();
 
-        NodoLista<Transaction> nodo = listaTx.firtNodo();
+        ListNode<Transaction> nodo = listaTx.firtNodo();
         while (nodo != null) {
             Transaction t = nodo.getValorNodo();
             totalMonto += t.getAmount();
@@ -254,7 +254,7 @@ public class ReportService {
         }
 
         Map<String, Double> montoPorTipo = new HashMap<>();
-        NodoLista<ParConteo> nodoC = conteoTipo.firtNodo();
+        ListNode<ParConteo> nodoC = conteoTipo.firtNodo();
         while (nodoC != null) {
             montoPorTipo.put(nodoC.getValorNodo().clave, nodoC.getValorNodo().totalMonto);
             nodoC = nodoC.getSiguienteNodo();
@@ -269,9 +269,9 @@ public class ReportService {
                 .build();
     }
 
-    private String resolverTipoWallet(ListaSimple<Wallet> listaWallets, String walletId) {
+    private String resolverTipoWallet(LinkedList<Wallet> listaWallets, String walletId) {
         if (walletId == null) return "Desconocido";
-        NodoLista<Wallet> nodo = listaWallets.firtNodo();
+        ListNode<Wallet> nodo = listaWallets.firtNodo();
         while (nodo != null) {
             if (nodo.getValorNodo().getId().equals(walletId)) {
                 return nodo.getValorNodo().getType();
@@ -281,8 +281,8 @@ public class ReportService {
         return "Desconocido";
     }
 
-    private long buscarConteo(ListaSimple<ParConteo> lista, String clave) {
-        NodoLista<ParConteo> nodo = lista.firtNodo();
+    private long buscarConteo(LinkedList<ParConteo> lista, String clave) {
+        ListNode<ParConteo> nodo = lista.firtNodo();
         while (nodo != null) {
             if (nodo.getValorNodo().clave.equals(clave)) {
                 return nodo.getValorNodo().conteo;
