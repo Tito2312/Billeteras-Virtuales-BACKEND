@@ -52,9 +52,10 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/api/transactions/**").permitAll()
-                        .requestMatchers(HttpMethod.PUT, "/api/users/{id}").authenticated()
-                        .anyRequest().authenticated())
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()  // línea nueva
+                .requestMatchers("/api/auth/**", "/api/transactions/**").permitAll()
+                .requestMatchers(HttpMethod.PUT, "/api/users/{id}").authenticated()
+                .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
