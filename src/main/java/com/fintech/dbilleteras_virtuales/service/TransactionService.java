@@ -18,9 +18,9 @@ import com.fintech.dbilleteras_virtuales.service.LevelBenefitService;
 import com.fintech.dbilleteras_virtuales.model.TransactionType;
 import com.fintech.dbilleteras_virtuales.repository.TransactionRepository;
 import com.fintech.dbilleteras_virtuales.repository.UserRepository;
-import com.fintech.dbilleteras_virtuales.dataStructure.Pila;
-import com.fintech.dbilleteras_virtuales.dataStructure.ListaSimple;
-import com.fintech.dbilleteras_virtuales.dataStructure.NodoLista;
+import com.fintech.dbilleteras_virtuales.dataStructure.Stack;
+import com.fintech.dbilleteras_virtuales.dataStructure.LinkedList;
+import com.fintech.dbilleteras_virtuales.dataStructure.ListNode;
 
 import lombok.RequiredArgsConstructor;
 
@@ -399,11 +399,11 @@ public class TransactionService {
         return transactionRepository.findBySourceWalletOrTargetWallet(walletId, walletId);
     }
 
-    public Pila<Transaction> apilarTransaccionRevertir(String userid) {
+    public Stack<Transaction> apilarTransaccionRevertir(String userid) {
 
         List<Transaction> transactions = transactionRepository.findByUserIdOrderByCreatedAtAsc(userid);
 
-        Pila<Transaction> pilaTransactions = new Pila<>();
+        Stack<Transaction> pilaTransactions = new Stack<>();
 
         for (Transaction t : transactions) {
             pilaTransactions.apilar(t);
@@ -416,10 +416,10 @@ public class TransactionService {
 
     public List ListTransactions(String userId) {
 
-        ListaSimple<Transaction> listaTransactions = historyTransactions(userId);
+        LinkedList<Transaction> listaTransactions = historyTransactions(userId);
 
         List<Transaction> resultado = new ArrayList<>();
-        NodoLista<Transaction> actual = listaTransactions.primerNodoLista;
+        ListNode<Transaction> actual = listaTransactions.primerNodoLista;
 
         while (actual != null) {
             resultado.add(actual.getValorNodo());
@@ -430,11 +430,11 @@ public class TransactionService {
 
     }
 
-    public ListaSimple<Transaction> historyTransactions(String userid) {
+    public LinkedList<Transaction> historyTransactions(String userid) {
 
         List<Transaction> transactions = transactionRepository.findByUserIdOrderByCreatedAtAsc(userid);
 
-        ListaSimple<Transaction> ListaTransactions = new ListaSimple<>();
+        LinkedList<Transaction> ListaTransactions = new LinkedList<>();
 
         for (Transaction t : transactions) {
             ListaTransactions.agregar(t);
@@ -447,7 +447,7 @@ public class TransactionService {
 
     public Transaction reverseTransactionPila(String userId) {
 
-        Pila<Transaction> transactions = apilarTransaccionRevertir(userId);
+        Stack<Transaction> transactions = apilarTransaccionRevertir(userId);
 
         if (!transactions.estaVacia()) {
             return null;
@@ -463,7 +463,7 @@ public class TransactionService {
 
     public Transaction reverseTransactionList(String userId, String transactionId) {
 
-        ListaSimple<Transaction> transactions = historyTransactions(userId);
+        LinkedList<Transaction> transactions = historyTransactions(userId);
 
         if (transactions.estaVacia()) {
             return null;
