@@ -38,6 +38,7 @@ public class User implements UserDetails {
     private String level = "Bronze";
     private LocalDate registrationDate = LocalDate.now();
     private boolean isActive = false;
+    private boolean isAdmin = false;
     private String verificationToken;
 
     @Override

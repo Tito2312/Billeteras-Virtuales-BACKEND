@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.fintech.dbilleteras_virtuales.model.Transaction;
+import com.fintech.dbilleteras_virtuales.service.TransactionAnalyticsService;
 
 import com.fintech.dbilleteras_virtuales.model.TransactionStatus;
 import com.fintech.dbilleteras_virtuales.service.LevelBenefitService;
@@ -33,6 +34,7 @@ public class TransactionService {
     private final LevelBenefitService levelBenefitService;
     private final RewardService rewardService;
     private final WalletService walletService;
+    private final TransactionAnalyticsService TransactionAnalyticsService;
 
     public Transaction findById(String id) {
         return transactionRepository.findById(id)
@@ -97,11 +99,12 @@ public class TransactionService {
 
                 rewardService.updateUserPoints(userId, points);
                 notificationService.notificationTransaction(user.getEmail(), "RECARGA", amount);
+                TransactionAnalyticsService.anomalyDetection(userId, amount);
 
                 return savedTransaction;
 
             } catch (Exception e) {
-                // Crear transacción fallida
+
                 Transaction failedTransaction = new Transaction();
                 failedTransaction.setUserId(userId);
                 failedTransaction.setTargetWallet(targetWallet);

@@ -25,4 +25,10 @@ public interface TransactionRepository extends MongoRepository<Transaction, Stri
             LocalDateTime inicio,
             LocalDateTime fin);
 
+    List<Transaction> findByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
+
+    List<Transaction> findByType(com.fintech.dbilleteras_virtuales.model.TransactionType type);
+
+    List<Transaction> findByUserIdAndType(String userId, com.fintech.dbilleteras_virtuales.model.TransactionType type);
+
 }
