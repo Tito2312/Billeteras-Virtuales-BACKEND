@@ -10,21 +10,20 @@ import lombok.Data;
 @Data
 public class ScheduledOperationRequestDto{
     
-    @NotBlank
+    @NotBlank(message = "El userId es obligatorio")
     private String userId;
 
     private String sourceWalletId;
 
-    @NotBlank
     private String targetWalletId;
 
-    @NotBlank
+    @NotNull(message = "El tipo de operación es obligatorio")
     private TransactionType type;
 
-    @Positive
-    @NotBlank
-    private double amount;
+    @NotNull(message = "El monto es obligatorio")
+    @Positive(message = "El monto debe ser mayor a 0")
+    private Double amount; 
 
-    @NotNull
+    @NotNull(message = "La fecha es obligatoria")
     private LocalDateTime scheduledDate;
 }
