@@ -85,7 +85,7 @@ public class TransactionController {
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Transaction>> getHistoryByUserId(@RequestParam String userId) {
+    public ResponseEntity<List<Transaction>> getHistoryByUserId(@PathVariable String userId) {
         return ResponseEntity.ok(transactionService.getHistoryByUserId(userId));
     }
 

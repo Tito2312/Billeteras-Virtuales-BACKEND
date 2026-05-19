@@ -31,6 +31,10 @@ public interface TransactionRepository extends MongoRepository<Transaction, Stri
     List<Transaction> findByType(com.fintech.dbilleteras_virtuales.model.TransactionType type);
 
     List<Transaction> findByUserIdAndType(String userId, com.fintech.dbilleteras_virtuales.model.TransactionType type);
-    
+
+    List<Transaction> findByUserIdAndCreatedAtBetween(String userId,
+            LocalDateTime inicio,
+            LocalDateTime fin);
+
     List<Transaction> findByTypeAndReceiverUserIdNotNull(TransactionType type);
 }

@@ -121,4 +121,28 @@ public class NotificationService {
         String message = "Hola,\n\nHicieste una Transaccion sospechosa, su monto fue mayor al promedio de las otras ";
         return sendEmail(message, subject, email);
     }
+
+    public Notification anomalyHighAmount(String email) {
+        String subject = "🚨 Alerta: Monto inusualmente alto detectado";
+        String message = "Hola,\n\nHemos detectado una transacción con un monto inusualmente alto respecto a tu historial.\n\nSi no reconoces esta operación, contacta a soporte de inmediato.\n\nSaludos,\nEquipo de Billeteras Virtuales";
+        return sendEmail(message, subject, email);
+    }
+
+    public Notification anomalyFastTransfers(String email) {
+        String subject = "⚡ Alerta: Múltiples transferencias en poco tiempo";
+        String message = "Hola,\n\nHemos detectado varias transferencias consecutivas en un período muy corto de tiempo.\n\nSi no reconoces estas operaciones, contacta a soporte de inmediato.\n\nSaludos,\nEquipo de Billeteras Virtuales";
+        return sendEmail(message, subject, email);
+    }
+
+    public Notification anomalyRepetitiveTransfers(String email) {
+        String subject = "🔁 Alerta: Transferencias repetitivas al mismo destino";
+        String message = "Hola,\n\nHemos detectado múltiples transferencias hacia el mismo destinatario en un intervalo reducido de tiempo.\n\nSi no reconoces estas operaciones, contacta a soporte de inmediato.\n\nSaludos,\nEquipo de Billeteras Virtuales";
+        return sendEmail(message, subject, email);
+    }
+
+    public Notification anomalyNocturnalActivity(String email) {
+        String subject = "🌙 Alerta: Actividad nocturna inusual";
+        String message = "Hola,\n\nHemos detectado varias transacciones realizadas en horario nocturno, lo cual es inusual en tu historial.\n\nSi no reconoces estas operaciones, contacta a soporte de inmediato.\n\nSaludos,\nEquipo de Billeteras Virtuales";
+        return sendEmail(message, subject, email);
+    }
 }
