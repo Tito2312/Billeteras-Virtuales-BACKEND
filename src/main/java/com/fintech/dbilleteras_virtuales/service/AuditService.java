@@ -39,4 +39,13 @@ public class AuditService {
                 .build();
         return auditRepository.save(audit);
     }
+
+    public List<Audit> historyUserAudit(String userId) {
+
+        List<Audit> audits = auditRepository.findByUserId(userId);
+
+        return audits;
+
+    }
+
 }

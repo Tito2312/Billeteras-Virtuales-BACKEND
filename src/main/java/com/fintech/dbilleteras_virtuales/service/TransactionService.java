@@ -9,7 +9,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.fintech.dbilleteras_virtuales.model.Transaction;
-
+import com.fintech.dbilleteras_virtuales.dataStructure.Queue;
 import com.fintech.dbilleteras_virtuales.model.TransactionStatus;
 import com.fintech.dbilleteras_virtuales.model.TransactionType;
 import com.fintech.dbilleteras_virtuales.repository.TransactionRepository;
@@ -502,6 +502,25 @@ public class TransactionService {
                 .findBySourceWalletAndCreatedAtBetweenOrderByCreatedAtAsc(walletId, dateFist, dateLast);
 
         return transactionsDateRange;
+    }
+
+    public Queue<Transaction> historyCola(String userId) {
+
+        List<Transaction> transactions = transactionRepository.findByUserId(userId);
+        Queue<Transaction> queueTransactions = new Queue<>();
+
+        for (Transaction t : transactions) {
+
+            if (t.isReversed() == true) {
+
+                queueTransactions.enqueue(t);
+
+            }
+
+        }
+
+        return queueTransactions;
+
     }
 
 }
