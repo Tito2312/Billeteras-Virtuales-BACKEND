@@ -95,7 +95,8 @@ public class TransactionService {
 
                 rewardService.updateUserPoints(userId, points);
                 notificationService.notificationTransaction(user.getEmail(), "RECARGA", amount);
-                TransactionAnalyticsService.anomalyDetection(userId, amount);
+                TransactionAnalyticsService.anomalyDetection(userId, amount, targetWallet);
+                TransactionAnalyticsService.detectNocturnalActivity(userId);
 
                 return savedTransaction;
 
@@ -164,6 +165,8 @@ public class TransactionService {
 
                 rewardService.updateUserPoints(userId, points);
                 notificationService.notificationTransaction(user.getEmail(), "RETIRO", amount);
+                TransactionAnalyticsService.anomalyDetection(userId, amount, sourceWallet);
+                TransactionAnalyticsService.detectNocturnalActivity(userId);
 
                 return savedTransaction;
 
@@ -238,6 +241,10 @@ public class TransactionService {
 
                 rewardService.updateUserPoints(userId, points);
                 notificationService.notificationTransaction(user.getEmail(), "TRANSFERENCIA", amount);
+                TransactionAnalyticsService.anomalyDetection(userId, amount, sourceWallet);
+                TransactionAnalyticsService.detectRepetitiveTransfers(userId);
+                TransactionAnalyticsService.detectFastTransfers(userId);
+                TransactionAnalyticsService.detectNocturnalActivity(userId);
                 return savedTransaction;
 
             } catch (Exception e) {
@@ -324,6 +331,10 @@ public class TransactionService {
                 notificationService.TransferNotification(user.getEmail(), user.getName(), user2.getEmail(),
                         user2.getName(),
                         amount);
+                TransactionAnalyticsService.anomalyDetection(userId, amount, sourceWallet);
+                TransactionAnalyticsService.detectRepetitiveTransfers(userId);
+                TransactionAnalyticsService.detectFastTransfers(userId);
+                TransactionAnalyticsService.detectNocturnalActivity(userId);
                 return savedTransaction;
 
             } catch (Exception e) {
