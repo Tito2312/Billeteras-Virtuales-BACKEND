@@ -7,12 +7,11 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.fintech.dbilleteras_virtuales.dataStructure.ListaSimple;
+import com.fintech.dbilleteras_virtuales.dataStructure.LinkedList;
+import com.fintech.dbilleteras_virtuales.dataStructure.ListNode;
 import com.fintech.dbilleteras_virtuales.model.Transaction;
 import com.fintech.dbilleteras_virtuales.repository.TransactionRepository;
 import com.fintech.dbilleteras_virtuales.repository.UserRepository;
-import com.fintech.dbilleteras_virtuales.dataStructure.NodoLista;
-import com.fintech.dbilleteras_virtuales.service.NotificationService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,53 +23,38 @@ public class TransactionAnalyticsService {
     public final UserRepository userRepository;
     public final NotificationService notificationService;
 
-    public List<Transaction> historytransactions(String userId) {
-
-        List<Transaction> listTransactions = transactionRepository.findByUserId(userId);
-        return listTransactions;
-
+    public List<Transaction> historyTransactions(String userId) {
+        return transactionRepository.findByUserId(userId);
     }
 
     public double averageTransactions(String userId) {
+        List<Transaction> list = historyTransactions(userId);
 
-        List<Transaction> list = historytransactions(userId);
-
-        ListaSimple<Transaction> transactionsListaSimple = new ListaSimple<>();
-
+        LinkedList<Transaction> transactionLinkedList = new LinkedList<>();
         for (Transaction t : list) {
-            transactionsListaSimple.agregar(t);
-
+            transactionLinkedList.add(t);
         }
 
-        double suma = 0;
-        int count = transactionsListaSimple.getTamaño();
+        int count = transactionLinkedList.getSize();
+        if (count == 0) return 0;
 
-        NodoLista<Transaction> firstNode = transactionsListaSimple.firtNodo();
-
-        while (firstNode != null) {
-
-            suma += firstNode.getValorNodo().getAmount();
-            firstNode = firstNode.getSiguienteNodo();
-
+        double sum = 0;
+        ListNode<Transaction> current = transactionLinkedList.firstNode();
+        while (current != null) {
+            sum += current.getNodeValue().getAmount();
+            current = current.getNextNode();
         }
 
-        double promedio = suma / count;
-
-        return promedio;
-
+        return sum / count;
     }
 
     public void anomalyDetection(String userId, double amount) {
-
         var user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         if (amount > averageTransactions(userId) * 2) {
-
             notificationService.anomalyDetection(user.getEmail());
-
         }
-
     }
 
     public void detectFastTransfers(String userId) {
@@ -83,38 +67,31 @@ public class TransactionAnalyticsService {
         List<Transaction> transactions = transactionRepository
                 .findByUserIdAndCreatedAtBetween(userId, starDay, endDay);
 
-        ListaSimple<Transaction> listTransaction = new ListaSimple<>();
-
+        LinkedList<Transaction> listTransaction = new LinkedList<>();
         for (Transaction t : transactions) {
-            listTransaction.agregar(t);
-
+            listTransaction.add(t);
         }
 
-        NodoLista<Transaction> firsNodo = listTransaction.firtNodo();
+        ListNode<Transaction> firsNodo = listTransaction.firstNode();
         int count = 0;
 
-        while (firsNodo != null && firsNodo.getSiguienteNodo() != null) {
+        while (firsNodo != null && firsNodo.getNextNode() != null) {
 
-            Transaction actual = firsNodo.getValorNodo();
-            Transaction siguiente = firsNodo.getSiguienteNodo().getValorNodo();
+            Transaction actual = firsNodo.getNodeValue();
+            Transaction siguiente = firsNodo.getNextNode().getNodeValue();
 
             long minutes = Duration.between(actual.getCreatedAt(), siguiente.getCreatedAt()).toMinutes();
 
             if (minutes < 5) {
                 count++;
-
-                if (count > 5) {
+                if (count > 3) {
                     notificationService.anomalyDetection(user.getEmail());
-
                 }
-
             } else {
                 count = 0;
             }
-            firsNodo = firsNodo.getSiguienteNodo();
-
+            firsNodo = firsNodo.getNextNode();
         }
-
     }
 
     public void detectRepetitiveTransfers(String userId) {
@@ -127,41 +104,33 @@ public class TransactionAnalyticsService {
         List<Transaction> transactions = transactionRepository
                 .findByUserIdAndCreatedAtBetween(userId, starDay, endDay);
 
-        ListaSimple<Transaction> listTransaction = new ListaSimple<>();
-
+        LinkedList<Transaction> listTransaction = new LinkedList<>();
         for (Transaction t : transactions) {
-            listTransaction.agregar(t);
-
+            listTransaction.add(t);
         }
 
-        NodoLista<Transaction> firsNodo = listTransaction.firtNodo();
+        ListNode<Transaction> firsNodo = listTransaction.firstNode();
         int count = 0;
 
-        while (firsNodo != null && firsNodo.getSiguienteNodo() != null) {
+        while (firsNodo != null && firsNodo.getNextNode() != null) {
 
-            Transaction actual = firsNodo.getValorNodo();
-            Transaction siguiente = firsNodo.getSiguienteNodo().getValorNodo();
+            Transaction actual = firsNodo.getNodeValue();
+            Transaction siguiente = firsNodo.getNextNode().getNodeValue();
 
-            String userReceiverId = firsNodo.getValorNodo().getReceiverUserId();
-            String userReceiverId2 = firsNodo.getSiguienteNodo().getValorNodo().getReceiverUserId();
+            String userReceiverId = actual.getReceiverUserId();
+            String userReceiverId2 = siguiente.getReceiverUserId();
 
             long minutes = Duration.between(actual.getCreatedAt(), siguiente.getCreatedAt()).toMinutes();
 
             if (minutes < 5 && userReceiverId != null && userReceiverId.equals(userReceiverId2)) {
                 count++;
-
-                if (count > 5) {
+                if (count > 3) {
                     notificationService.anomalyDetection(user.getEmail());
-
                 }
-
             } else {
                 count = 0;
             }
-            firsNodo = firsNodo.getSiguienteNodo();
-
+            firsNodo = firsNodo.getNextNode();
         }
-
     }
-
 }

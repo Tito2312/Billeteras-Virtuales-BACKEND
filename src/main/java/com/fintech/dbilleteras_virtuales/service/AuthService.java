@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.fintech.dbilleteras_virtuales.dto.AuthResponse;
 import com.fintech.dbilleteras_virtuales.dto.LoginRequest;
 import com.fintech.dbilleteras_virtuales.dto.RegisterRequest;
+import com.fintech.dbilleteras_virtuales.model.Role;
 import com.fintech.dbilleteras_virtuales.model.User;
 import com.fintech.dbilleteras_virtuales.repository.UserRepository;
 
@@ -45,8 +46,10 @@ public class AuthService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .phoneNumber(request.getPhone())
+                .documentNumber(request.getDocumentNumber())
                 .isActive(false)
                 .verificationToken(verificationToken)
+                .role(Role.USER)
                 .build();
 
         // Guardar usuario en la base de datos

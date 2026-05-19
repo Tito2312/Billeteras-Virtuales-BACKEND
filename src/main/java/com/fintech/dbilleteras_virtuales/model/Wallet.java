@@ -19,6 +19,7 @@ public class Wallet {
 
     private String userId;
 
+    private String transferKey;
     private String name;
     private String type;
     private double balance;

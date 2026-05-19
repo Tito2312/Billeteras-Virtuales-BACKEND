@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.fintech.dbilleteras_virtuales.model.Transaction;
 import com.fintech.dbilleteras_virtuales.service.TransactionService;
-import com.fintech.dbilleteras_virtuales.dataStructure.Pila;
+import com.fintech.dbilleteras_virtuales.dataStructure.Stack;
 
 import lombok.RequiredArgsConstructor;
 

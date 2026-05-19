@@ -1,7 +1,7 @@
 package com.fintech.dbilleteras_virtuales.service;
 
-import com.fintech.dbilleteras_virtuales.dataStructure.ListaSimple;
-import com.fintech.dbilleteras_virtuales.dataStructure.NodoLista;
+import com.fintech.dbilleteras_virtuales.dataStructure.LinkedList;
+import com.fintech.dbilleteras_virtuales.dataStructure.ListNode;
 import com.fintech.dbilleteras_virtuales.dto.ReportDto;
 import com.fintech.dbilleteras_virtuales.model.Transaction;
 import com.fintech.dbilleteras_virtuales.model.TransactionType;
@@ -27,267 +27,267 @@ public class ReportService {
     private final WalletRepository walletRepository;
     private final UserRepository userRepository;
 
-    private static class ParConteo {
-        String clave;
-        long conteo;
-        double totalMonto;
+    private static class EntryCount {
+        String key;
+        long count;
+        double totalAmount;
 
-        ParConteo(String clave) {
-            this.clave = clave;
-            this.conteo = 0;
-            this.totalMonto = 0;
+        EntryCount(String key) {
+            this.key = key;
+            this.count = 0;
+            this.totalAmount = 0;
         }
     }
 
-    private ParConteo obtenerOCrear(ListaSimple<ParConteo> lista, String clave) {
-        NodoLista<ParConteo> nodo = lista.firtNodo();
-        while (nodo != null) {
-            if (nodo.getValorNodo().clave.equals(clave)) {
-                return nodo.getValorNodo();
+    private EntryCount getOrCreate(LinkedList<EntryCount> list, String key) {
+        ListNode<EntryCount> node = list.firstNode();
+        while (node != null) {
+            if (node.getNodeValue().key.equals(key)) {
+                return node.getNodeValue();
             }
-            nodo = nodo.getSiguienteNodo();
+            node = node.getNextNode();
         }
-        ParConteo nuevo = new ParConteo(clave);
-        lista.agregar(nuevo);
-        return nuevo;
+        EntryCount newEntry = new EntryCount(key);
+        list.add(newEntry);
+        return newEntry;
     }
 
-    private void ordenarPorConteoDesc(ListaSimple<ParConteo> lista) {
-        if (lista.getTamaño() <= 1) return;
-        boolean intercambio;
+    private void sortByCountDesc(LinkedList<EntryCount> list) {
+        if (list.getSize() <= 1) return;
+        boolean swapped;
         do {
-            intercambio = false;
-            NodoLista<ParConteo> nodo = lista.firtNodo();
-            while (nodo != null && nodo.getSiguienteNodo() != null) {
-                ParConteo actual = nodo.getValorNodo();
-                ParConteo siguiente = nodo.getSiguienteNodo().getValorNodo();
-                if (actual.conteo < siguiente.conteo) {
-                    nodo.setValorNodo(siguiente);
-                    nodo.getSiguienteNodo().setValorNodo(actual);
-                    intercambio = true;
+            swapped = false;
+            ListNode<EntryCount> node = list.firstNode();
+            while (node != null && node.getNextNode() != null) {
+                EntryCount current = node.getNodeValue();
+                EntryCount next = node.getNextNode().getNodeValue();
+                if (current.count < next.count) {
+                    node.setNodeValue(next);
+                    node.getNextNode().setNodeValue(current);
+                    swapped = true;
                 }
-                nodo = nodo.getSiguienteNodo();
+                node = node.getNextNode();
             }
-        } while (intercambio);
+        } while (swapped);
     }
 
     public List<ReportDto.WalletUsageReport> getWalletsWithMostUsage(int topN) {
         List<Transaction> all = transactionRepository.findAll();
 
-        ListaSimple<Transaction> listaTx = new ListaSimple<>();
-        for (Transaction t : all) listaTx.agregar(t);
+        LinkedList<Transaction> txList = new LinkedList<>();
+        for (Transaction t : all) txList.add(t);
 
-        ListaSimple<ParConteo> conteo = new ListaSimple<>();
+        LinkedList<EntryCount> count = new LinkedList<>();
 
-        NodoLista<Transaction> nodo = listaTx.firtNodo();
-        while (nodo != null) {
-            Transaction t = nodo.getValorNodo();
+        ListNode<Transaction> node = txList.firstNode();
+        while (node != null) {
+            Transaction t = node.getNodeValue();
             if (t.getSourceWallet() != null) {
-                ParConteo entrada = obtenerOCrear(conteo, t.getSourceWallet());
-                entrada.conteo++;
-                entrada.totalMonto += t.getAmount();
+                EntryCount entry = getOrCreate(count, t.getSourceWallet());
+                entry.count++;
+                entry.totalAmount += t.getAmount();
             }
             if (t.getTargetWallet() != null && !t.getTargetWallet().equals(t.getSourceWallet())) {
-                ParConteo entrada = obtenerOCrear(conteo, t.getTargetWallet());
-                entrada.conteo++;
+                EntryCount entry = getOrCreate(count, t.getTargetWallet());
+                entry.count++;
             }
-            nodo = nodo.getSiguienteNodo();
+            node = node.getNextNode();
         }
 
-        ordenarPorConteoDesc(conteo);
+        sortByCountDesc(count);
 
-        List<ReportDto.WalletUsageReport> resultado = new ArrayList<>();
-        NodoLista<ParConteo> nodoC = conteo.firtNodo();
+        List<ReportDto.WalletUsageReport> result = new ArrayList<>();
+        ListNode<EntryCount> nodeC = count.firstNode();
         int i = 0;
-        while (nodoC != null && i < topN) {
-            ParConteo p = nodoC.getValorNodo();
-            Optional<Wallet> wallet = walletRepository.findById(p.clave);
-            resultado.add(ReportDto.WalletUsageReport.builder()
-                    .walletId(p.clave)
-                    .walletName(wallet.map(Wallet::getName).orElse("Desconocida"))
-                    .walletType(wallet.map(Wallet::getType).orElse("Desconocido"))
-                    .transactionCount(p.conteo)
-                    .totalAmount(p.totalMonto)
+        while (nodeC != null && i < topN) {
+            EntryCount p = nodeC.getNodeValue();
+            Optional<Wallet> wallet = walletRepository.findById(p.key);
+            result.add(ReportDto.WalletUsageReport.builder()
+                    .walletId(p.key)
+                    .walletName(wallet.map(Wallet::getName).orElse("Unknown"))
+                    .walletType(wallet.map(Wallet::getType).orElse("Unknown"))
+                    .transactionCount(p.count)
+                    .totalAmount(p.totalAmount)
                     .build());
-            nodoC = nodoC.getSiguienteNodo();
+            nodeC = nodeC.getNextNode();
             i++;
         }
-        return resultado;
+        return result;
     }
 
     public List<ReportDto.UserTransferReport> getUsersWithMostTransfers(int topN) {
         List<Transaction> transfers = transactionRepository.findByType(TransactionType.TRANSFER);
 
-        ListaSimple<Transaction> listaTx = new ListaSimple<>();
-        for (Transaction t : transfers) listaTx.agregar(t);
+        LinkedList<Transaction> txList = new LinkedList<>();
+        for (Transaction t : transfers) txList.add(t);
 
-        ListaSimple<ParConteo> conteo = new ListaSimple<>();
+        LinkedList<EntryCount> count = new LinkedList<>();
 
-        NodoLista<Transaction> nodo = listaTx.firtNodo();
-        while (nodo != null) {
-            Transaction t = nodo.getValorNodo();
-            ParConteo entrada = obtenerOCrear(conteo, t.getUserId());
-            entrada.conteo++;
-            entrada.totalMonto += t.getAmount();
-            nodo = nodo.getSiguienteNodo();
+        ListNode<Transaction> node = txList.firstNode();
+        while (node != null) {
+            Transaction t = node.getNodeValue();
+            EntryCount entry = getOrCreate(count, t.getUserId());
+            entry.count++;
+            entry.totalAmount += t.getAmount();
+            node = node.getNextNode();
         }
 
-        ordenarPorConteoDesc(conteo);
+        sortByCountDesc(count);
 
-        List<ReportDto.UserTransferReport> resultado = new ArrayList<>();
-        NodoLista<ParConteo> nodoC = conteo.firtNodo();
+        List<ReportDto.UserTransferReport> result = new ArrayList<>();
+        ListNode<EntryCount> nodeC = count.firstNode();
         int i = 0;
-        while (nodoC != null && i < topN) {
-            ParConteo p = nodoC.getValorNodo();
-            userRepository.findById(p.clave).ifPresent(user ->
-                    resultado.add(ReportDto.UserTransferReport.builder()
+        while (nodeC != null && i < topN) {
+            EntryCount p = nodeC.getNodeValue();
+            userRepository.findById(p.key).ifPresent(user ->
+                    result.add(ReportDto.UserTransferReport.builder()
                             .userId(user.getId())
                             .userName(user.getName())
                             .userEmail(user.getEmail())
-                            .transferCount(p.conteo)
-                            .totalTransferred(p.totalMonto)
+                            .transferCount(p.count)
+                            .totalTransferred(p.totalAmount)
                             .build()));
-            nodoC = nodoC.getSiguienteNodo();
+            nodeC = nodeC.getNextNode();
             i++;
         }
-        return resultado;
+        return result;
     }
 
     public List<ReportDto.CategoryActivityReport> getMostActiveWalletCategories() {
         List<Wallet> allWallets = walletRepository.findAll();
         List<Transaction> allTransactions = transactionRepository.findAll();
 
-        ListaSimple<Wallet> listaWallets = new ListaSimple<>();
-        for (Wallet w : allWallets) listaWallets.agregar(w);
+        LinkedList<Wallet> walletList = new LinkedList<>();
+        for (Wallet w : allWallets) walletList.add(w);
 
-        ListaSimple<Transaction> listaTx = new ListaSimple<>();
-        for (Transaction t : allTransactions) listaTx.agregar(t);
+        LinkedList<Transaction> txList = new LinkedList<>();
+        for (Transaction t : allTransactions) txList.add(t);
 
-        ListaSimple<ParConteo> conteoCategoria = new ListaSimple<>();
+        LinkedList<EntryCount> categoryCount = new LinkedList<>();
 
-        NodoLista<Transaction> nodoT = listaTx.firtNodo();
-        while (nodoT != null) {
-            Transaction t = nodoT.getValorNodo();
-            String tipo = resolverTipoWallet(listaWallets, t.getSourceWallet());
-            ParConteo entrada = obtenerOCrear(conteoCategoria, tipo);
-            entrada.conteo++;
-            entrada.totalMonto += t.getAmount();
-            nodoT = nodoT.getSiguienteNodo();
+        ListNode<Transaction> nodeT = txList.firstNode();
+        while (nodeT != null) {
+            Transaction t = nodeT.getNodeValue();
+            String type = resolveWalletType(walletList, t.getSourceWallet());
+            EntryCount entry = getOrCreate(categoryCount, type);
+            entry.count++;
+            entry.totalAmount += t.getAmount();
+            nodeT = nodeT.getNextNode();
         }
 
-        ListaSimple<ParConteo> conteoBilleteras = new ListaSimple<>();
-        NodoLista<Wallet> nodoWC = listaWallets.firtNodo();
-        while (nodoWC != null) {
-            Wallet w = nodoWC.getValorNodo();
-            ParConteo entrada = obtenerOCrear(conteoBilleteras, w.getType());
-            entrada.conteo++;
-            nodoWC = nodoWC.getSiguienteNodo();
+        LinkedList<EntryCount> walletCount = new LinkedList<>();
+        ListNode<Wallet> nodeW = walletList.firstNode();
+        while (nodeW != null) {
+            Wallet w = nodeW.getNodeValue();
+            EntryCount entry = getOrCreate(walletCount, w.getType());
+            entry.count++;
+            nodeW = nodeW.getNextNode();
         }
 
-        ordenarPorConteoDesc(conteoCategoria);
+        sortByCountDesc(categoryCount);
 
-        List<ReportDto.CategoryActivityReport> resultado = new ArrayList<>();
-        NodoLista<ParConteo> nodoC = conteoCategoria.firtNodo();
-        while (nodoC != null) {
-            ParConteo p = nodoC.getValorNodo();
-            long cantBilleteras = buscarConteo(conteoBilleteras, p.clave);
-            resultado.add(ReportDto.CategoryActivityReport.builder()
-                    .category(p.clave)
-                    .transactionCount(p.conteo)
-                    .walletCount(cantBilleteras)
-                    .totalAmount(p.totalMonto)
+        List<ReportDto.CategoryActivityReport> result = new ArrayList<>();
+        ListNode<EntryCount> nodeC = categoryCount.firstNode();
+        while (nodeC != null) {
+            EntryCount p = nodeC.getNodeValue();
+            long walletCountVal = searchCount(walletCount, p.key);
+            result.add(ReportDto.CategoryActivityReport.builder()
+                    .category(p.key)
+                    .transactionCount(p.count)
+                    .walletCount(walletCountVal)
+                    .totalAmount(p.totalAmount)
                     .build());
-            nodoC = nodoC.getSiguienteNodo();
+            nodeC = nodeC.getNextNode();
         }
-        return resultado;
+        return result;
     }
 
     public List<ReportDto.TransactionFrequencyReport> getTransactionFrequencyByType() {
         List<Transaction> all = transactionRepository.findAll();
 
-        ListaSimple<Transaction> listaTx = new ListaSimple<>();
-        for (Transaction t : all) listaTx.agregar(t);
+        LinkedList<Transaction> txList = new LinkedList<>();
+        for (Transaction t : all) txList.add(t);
 
-        ListaSimple<ParConteo> conteo = new ListaSimple<>();
+        LinkedList<EntryCount> count = new LinkedList<>();
 
-        NodoLista<Transaction> nodo = listaTx.firtNodo();
-        while (nodo != null) {
-            Transaction t = nodo.getValorNodo();
-            ParConteo entrada = obtenerOCrear(conteo, t.getType().name());
-            entrada.conteo++;
-            entrada.totalMonto += t.getAmount();
-            nodo = nodo.getSiguienteNodo();
+        ListNode<Transaction> node = txList.firstNode();
+        while (node != null) {
+            Transaction t = node.getNodeValue();
+            EntryCount entry = getOrCreate(count, t.getType().name());
+            entry.count++;
+            entry.totalAmount += t.getAmount();
+            node = node.getNextNode();
         }
 
-        ordenarPorConteoDesc(conteo);
+        sortByCountDesc(count);
 
-        List<ReportDto.TransactionFrequencyReport> resultado = new ArrayList<>();
-        NodoLista<ParConteo> nodoC = conteo.firtNodo();
-        while (nodoC != null) {
-            ParConteo p = nodoC.getValorNodo();
-            resultado.add(ReportDto.TransactionFrequencyReport.builder()
-                    .type(p.clave)
-                    .count(p.conteo)
-                    .totalAmount(p.totalMonto)
+        List<ReportDto.TransactionFrequencyReport> result = new ArrayList<>();
+        ListNode<EntryCount> nodeC = count.firstNode();
+        while (nodeC != null) {
+            EntryCount p = nodeC.getNodeValue();
+            result.add(ReportDto.TransactionFrequencyReport.builder()
+                    .type(p.key)
+                    .count(p.count)
+                    .totalAmount(p.totalAmount)
                     .build());
-            nodoC = nodoC.getSiguienteNodo();
+            nodeC = nodeC.getNextNode();
         }
-        return resultado;
+        return result;
     }
 
     public ReportDto.DateRangeSummaryReport getTotalAmountInDateRange(LocalDateTime start, LocalDateTime end) {
         List<Transaction> transactions = transactionRepository.findByCreatedAtBetween(start, end);
 
-        ListaSimple<Transaction> listaTx = new ListaSimple<>();
-        for (Transaction t : transactions) listaTx.agregar(t);
+        LinkedList<Transaction> txList = new LinkedList<>();
+        for (Transaction t : transactions) txList.add(t);
 
-        double totalMonto = 0;
-        ListaSimple<ParConteo> conteoTipo = new ListaSimple<>();
+        double totalAmount = 0;
+        LinkedList<EntryCount> typeCount = new LinkedList<>();
 
-        NodoLista<Transaction> nodo = listaTx.firtNodo();
-        while (nodo != null) {
-            Transaction t = nodo.getValorNodo();
-            totalMonto += t.getAmount();
-            ParConteo entrada = obtenerOCrear(conteoTipo, t.getType().name());
-            entrada.totalMonto += t.getAmount();
-            nodo = nodo.getSiguienteNodo();
+        ListNode<Transaction> node = txList.firstNode();
+        while (node != null) {
+            Transaction t = node.getNodeValue();
+            totalAmount += t.getAmount();
+            EntryCount entry = getOrCreate(typeCount, t.getType().name());
+            entry.totalAmount += t.getAmount();
+            node = node.getNextNode();
         }
 
-        Map<String, Double> montoPorTipo = new HashMap<>();
-        NodoLista<ParConteo> nodoC = conteoTipo.firtNodo();
-        while (nodoC != null) {
-            montoPorTipo.put(nodoC.getValorNodo().clave, nodoC.getValorNodo().totalMonto);
-            nodoC = nodoC.getSiguienteNodo();
+        Map<String, Double> amountByType = new HashMap<>();
+        ListNode<EntryCount> nodeC = typeCount.firstNode();
+        while (nodeC != null) {
+            amountByType.put(nodeC.getNodeValue().key, nodeC.getNodeValue().totalAmount);
+            nodeC = nodeC.getNextNode();
         }
 
         return ReportDto.DateRangeSummaryReport.builder()
                 .startDate(start)
                 .endDate(end)
-                .transactionCount(listaTx.getTamaño())
-                .totalAmount(totalMonto)
-                .amountByType(montoPorTipo)
+                .transactionCount(txList.getSize())
+                .totalAmount(totalAmount)
+                .amountByType(amountByType)
                 .build();
     }
 
-    private String resolverTipoWallet(ListaSimple<Wallet> listaWallets, String walletId) {
-        if (walletId == null) return "Desconocido";
-        NodoLista<Wallet> nodo = listaWallets.firtNodo();
-        while (nodo != null) {
-            if (nodo.getValorNodo().getId().equals(walletId)) {
-                return nodo.getValorNodo().getType();
+    private String resolveWalletType(LinkedList<Wallet> walletList, String walletId) {
+        if (walletId == null) return "Unknown";
+        ListNode<Wallet> node = walletList.firstNode();
+        while (node != null) {
+            if (node.getNodeValue().getId().equals(walletId)) {
+                return node.getNodeValue().getType();
             }
-            nodo = nodo.getSiguienteNodo();
+            node = node.getNextNode();
         }
-        return "Desconocido";
+        return "Unknown";
     }
 
-    private long buscarConteo(ListaSimple<ParConteo> lista, String clave) {
-        NodoLista<ParConteo> nodo = lista.firtNodo();
-        while (nodo != null) {
-            if (nodo.getValorNodo().clave.equals(clave)) {
-                return nodo.getValorNodo().conteo;
+    private long searchCount(LinkedList<EntryCount> list, String key) {
+        ListNode<EntryCount> node = list.firstNode();
+        while (node != null) {
+            if (node.getNodeValue().key.equals(key)) {
+                return node.getNodeValue().count;
             }
-            nodo = nodo.getSiguienteNodo();
+            node = node.getNextNode();
         }
         return 0;
     }

@@ -1,6 +1,7 @@
 package com.fintech.dbilleteras_virtuales.repository;
 
 import com.fintech.dbilleteras_virtuales.model.Transaction;
+import com.fintech.dbilleteras_virtuales.model.TransactionType;
 
 import java.time.LocalDateTime;
 
@@ -35,4 +36,5 @@ public interface TransactionRepository extends MongoRepository<Transaction, Stri
             LocalDateTime inicio,
             LocalDateTime fin);
 
+    List<Transaction> findByTypeAndReceiverUserIdNotNull(TransactionType type);
 }

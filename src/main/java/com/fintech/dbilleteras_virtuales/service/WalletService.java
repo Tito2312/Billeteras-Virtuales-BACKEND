@@ -7,10 +7,10 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import com.fintech.dbilleteras_virtuales.dto.WalletRequest;
+import com.fintech.dbilleteras_virtuales.model.User;
 import com.fintech.dbilleteras_virtuales.model.Wallet;
 import com.fintech.dbilleteras_virtuales.repository.UserRepository;
 import com.fintech.dbilleteras_virtuales.repository.WalletRepository;
-import com.fintech.dbilleteras_virtuales.service.NotificationService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,9 +23,14 @@ public class WalletService {
     private final NotificationService notificationService;
 
     public Wallet createWallet(WalletRequest request) {
+        User user = userRepository.findById(request.getUserId())
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
         if (!userRepository.existsById(request.getUserId())) {
-            throw new IllegalArgumentException("User not found");
+            throw new IllegalArgumentException("Usuario no encontrado");
         }
+
+        String transferKey = generateTransferKey(request.getName(), user.getDocumentNumber());
 
         Wallet wallet = Wallet.builder()
                 .userId(request.getUserId())
@@ -34,6 +39,7 @@ public class WalletService {
                 .balance(0.0)
                 .isActive(true)
                 .createdAt(LocalDate.now())
+                .transferKey(transferKey)
                 .build();
 
         return walletRepository.save(wallet);
@@ -41,7 +47,7 @@ public class WalletService {
 
     public List<Wallet> findAllByUser(String userId) {
         if (!userRepository.existsById(userId)) {
-            throw new IllegalArgumentException("User not found");
+            throw new IllegalArgumentException("Usuario no encontrado");
         }
         return walletRepository.findAllByUserId(userId);
     }
@@ -79,7 +85,7 @@ public class WalletService {
 
         if (balance < 100.0) {
             var user = userRepository.findById(userId)
-                    .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
             notificationService.notificationLowBalance(user.getEmail(), wallet.getName(), balance);
         }
 
@@ -122,5 +128,11 @@ public class WalletService {
             throw new RuntimeException("La billetera está inactiva");
         }
         return wallet;
+    }
+
+    private String generateTransferKey(String walletName, String documentNumber) {
+    
+    String cleanName = walletName.trim().toLowerCase().replace(" ", "");
+    return cleanName + documentNumber;
     }
 }
