@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import jakarta.validation.constraints.Email;
@@ -34,7 +35,7 @@ public class User implements UserDetails {
     private String password;
 
     @NotBlank
-    private String documentNumber;      
+    private String documentNumber;
     private String phoneNumber;
     private int points;
     private String level = "Bronze";

@@ -1,4 +1,4 @@
-package main.java.com.fintech.dbilleteras_virtuales.exception;
+package com.fintech.dbilleteras_virtuales.exception;
 
 import java.util.Map;
 import org.springframework.http.ResponseEntity;

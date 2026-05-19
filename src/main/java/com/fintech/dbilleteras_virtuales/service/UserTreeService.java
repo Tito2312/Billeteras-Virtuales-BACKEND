@@ -1,9 +1,10 @@
-package main.java.com.fintech.dbilleteras_virtuales.service;
+package com.fintech.dbilleteras_virtuales.service;
 
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.fintech.dbilleteras_virtuales.dataStructure.BinarySearchTree;
 import com.fintech.dbilleteras_virtuales.model.User;
 import com.fintech.dbilleteras_virtuales.repository.UserRepository;
 
@@ -23,7 +24,7 @@ public class UserTreeService {
     }
 
     public List<User> getOrderedUsers() {
-        return buildTree().inPorder();
+        return buildTree().inorder();
     }
 
     public List<User> getUsersByRange(int min, int max) {

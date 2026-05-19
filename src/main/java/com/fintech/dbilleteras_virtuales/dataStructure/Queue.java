@@ -1,77 +1,38 @@
 package com.fintech.dbilleteras_virtuales.dataStructure;
 
 public class Queue<T> {
-    private QueueNode<T> front;
-    private QueueNode<T> rear;
-    private int size;
+
+    private LinkedList<T> list;
 
     public Queue() {
-        this.front = null;
-        this.rear = null;
-        this.size = 0;
+        list = new LinkedList<>();
     }
 
-    public void enqueue(T data) {
-        QueueNode<T> newNode = new QueueNode<>(data);
-
-        if (isEmpty()) {
-            front = newNode;
-            rear = newNode;
-        } else {
-            rear.setNext(newNode);
-            rear = newNode;
-        }
-        size++;
+    public void enqueue(T value) {
+        list.add(value);
     }
 
     public T dequeue() {
+
         if (isEmpty()) {
-            throw new RuntimeException("The queue is empty");
+            return null;
         }
 
-        T data = front.getData();
-        front = front.getNext();
+        T value = list.firstListNode.getNodeValue();
+        list.remove(value);
 
-        if (front == null) {
-            rear = null;
-        }
-
-        size--;
-        return data;
-    }
-
-    public T front() {
-        if (isEmpty()) {
-            throw new RuntimeException("The queue is empty");
-        }
-        return front.getData();
+        return value;
     }
 
     public boolean isEmpty() {
-        return front == null;
+        return list.size == 0;
     }
 
-    public int getSize() {
-        return size;
-    }
-
-    public void print() {
+    public T peek() {
         if (isEmpty()) {
-            System.out.println("The queue is empty");
-            return;
+            return null;
         }
 
-        System.out.println("Queue (front -> rear):");
-        QueueNode<T> current = front;
-        while (current != null) {
-            System.out.println(current.getData());
-            current = current.getNext();
-        }
-    }
-
-    public void clear() {
-        front = null;
-        rear = null;
-        size = 0;
+        return list.firstListNode.getNodeValue();
     }
 }

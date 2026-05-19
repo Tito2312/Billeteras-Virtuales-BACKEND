@@ -1,4 +1,4 @@
-package main.java.com.fintech.dbilleteras_virtuales.dataStructure;
+package com.fintech.dbilleteras_virtuales.dataStructure;
 
 import java.util.*;
 
@@ -60,26 +60,34 @@ public class TransferGraph {
     }
 
     public List<String> findPath(String sourceUserId, String targetUserId) {
+
         Map<String, String> parent = new HashMap<>();
-        Queue<String> queue = new LinkedList<>();
+        Queue<String> queue = new Queue<>();
         Set<String> visited = new HashSet<>();
 
-        queue.add(sourceUserId);
+        queue.enqueue(sourceUserId);
         visited.add(sourceUserId);
 
         while (!queue.isEmpty()) {
-            String current = queue.poll();
+
+            String current = queue.dequeue();
+
             if (current.equals(targetUserId)) {
                 return buildPath(parent, sourceUserId, targetUserId);
             }
+
             for (GraphEdge edge : adjacencyList.getOrDefault(current, new ArrayList<>())) {
+
                 if (!visited.contains(edge.targetUserId)) {
+
                     visited.add(edge.targetUserId);
                     parent.put(edge.targetUserId, current);
-                    queue.add(edge.targetUserId);
+
+                    queue.enqueue(edge.targetUserId);
                 }
             }
         }
+
         return new ArrayList<>();
     }
 

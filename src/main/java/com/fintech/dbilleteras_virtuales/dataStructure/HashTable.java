@@ -1,4 +1,4 @@
-package main.java.com.fintech.dbilleteras_virtuales.dataStructure;
+package com.fintech.dbilleteras_virtuales.dataStructure;
 
 import java.util.ArrayList;
 import java.util.LinkedList;

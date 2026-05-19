@@ -1,20 +1,16 @@
 package com.fintech.dbilleteras_virtuales.service;
 
-import java.lang.reflect.Array;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.fintech.dbilleteras_virtuales.model.Transaction;
-import com.fintech.dbilleteras_virtuales.service.TransactionAnalyticsService;
 
 import com.fintech.dbilleteras_virtuales.model.TransactionStatus;
-import com.fintech.dbilleteras_virtuales.service.LevelBenefitService;
 import com.fintech.dbilleteras_virtuales.model.TransactionType;
 import com.fintech.dbilleteras_virtuales.repository.TransactionRepository;
 import com.fintech.dbilleteras_virtuales.repository.UserRepository;
@@ -406,7 +402,7 @@ public class TransactionService {
         Stack<Transaction> pilaTransactions = new Stack<>();
 
         for (Transaction t : transactions) {
-            pilaTransactions.apilar(t);
+            pilaTransactions.push(t);
 
         }
 
@@ -419,11 +415,11 @@ public class TransactionService {
         LinkedList<Transaction> listaTransactions = historyTransactions(userId);
 
         List<Transaction> resultado = new ArrayList<>();
-        ListNode<Transaction> actual = listaTransactions.primerNodoLista;
+        ListNode<Transaction> actual = listaTransactions.firstListNode;
 
         while (actual != null) {
-            resultado.add(actual.getValorNodo());
-            actual = actual.getSiguienteNodo();
+            resultado.add(actual.getNodeValue());
+            actual = actual.getNextNode();
         }
 
         return resultado;
@@ -437,7 +433,7 @@ public class TransactionService {
         LinkedList<Transaction> ListaTransactions = new LinkedList<>();
 
         for (Transaction t : transactions) {
-            ListaTransactions.agregar(t);
+            ListaTransactions.add(t);
 
         }
 
@@ -449,11 +445,11 @@ public class TransactionService {
 
         Stack<Transaction> transactions = apilarTransaccionRevertir(userId);
 
-        if (!transactions.estaVacia()) {
+        if (!transactions.isEmpty()) {
             return null;
         }
 
-        Transaction Lasttransaction = transactions.desapilar();
+        Transaction Lasttransaction = transactions.pop();
 
         Transaction revertida = reverseTransaction(userId, Lasttransaction.getId());
 
@@ -465,12 +461,12 @@ public class TransactionService {
 
         LinkedList<Transaction> transactions = historyTransactions(userId);
 
-        if (transactions.estaVacia()) {
+        if (transactions.isEmpty()) {
             return null;
 
         }
 
-        Transaction transactionReverse = transactions.buscarPorId(transactionId);
+        Transaction transactionReverse = transactions.searchById(transactionId);
 
         Transaction reverse = reverseTransaction(userId, transactionReverse.getId());
 

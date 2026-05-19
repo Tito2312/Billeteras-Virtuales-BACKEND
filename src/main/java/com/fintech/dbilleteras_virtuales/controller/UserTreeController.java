@@ -1,10 +1,14 @@
-package main.java.com.fintech.dbilleteras_virtuales.controller;
+package com.fintech.dbilleteras_virtuales.controller;
 
 import java.util.List;
 
+import org.springframework.web.bind.annotation.*;
+
 import com.fintech.dbilleteras_virtuales.model.User;
 
-import main.java.com.fintech.dbilleteras_virtuales.service.UserTreeService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import com.fintech.dbilleteras_virtuales.service.UserTreeService;
 
 @RestController
 @RequestMapping("/api/tree")

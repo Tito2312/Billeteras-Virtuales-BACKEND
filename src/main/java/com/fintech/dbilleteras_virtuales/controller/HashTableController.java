@@ -1,4 +1,4 @@
-package main.java.com.fintech.dbilleteras_virtuales.controller;
+package com.fintech.dbilleteras_virtuales.controller;
 
 import java.util.List;
 
