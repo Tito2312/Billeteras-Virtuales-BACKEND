@@ -27,6 +27,8 @@ public class WalletService {
             throw new IllegalArgumentException("User not found");
         }
 
+        String transferKey = generateTransferKey(request.getName(), user.getDocumentNumber());
+
         Wallet wallet = Wallet.builder()
                 .userId(request.getUserId())
                 .name(request.getName())
@@ -34,6 +36,7 @@ public class WalletService {
                 .balance(0.0)
                 .isActive(true)
                 .createdAt(LocalDate.now())
+                .transferKey(transferKey)
                 .build();
 
         return walletRepository.save(wallet);
@@ -123,4 +126,10 @@ public class WalletService {
         }
         return wallet;
     }
+
+    private String generateTransferKey(String walletName, String documentNumber) {
+    
+    String cleanName = walletName.trim().toLowerCase().replace(" ", "");
+    return cleanName + documentNumber;
+}
 }
