@@ -14,4 +14,6 @@ public class RegisterRequest {
     @NotBlank
     private String password;
     private String phone;
+    @NotBlank
+    private String documentNumber;
 }

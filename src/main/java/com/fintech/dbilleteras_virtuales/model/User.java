@@ -33,17 +33,19 @@ public class User implements UserDetails {
     @NotBlank
     private String password;
 
+    @NotBlank
+    private String documentNumber;      
     private String phoneNumber;
     private int points;
     private String level = "Bronze";
     private LocalDate registrationDate = LocalDate.now();
     private boolean isActive = false;
-    private boolean isAdmin = false;
     private String verificationToken;
+    private Role role = Role.USER;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+        return List.of(new SimpleGrantedAuthority(role.name()));
     }
 
     @Override

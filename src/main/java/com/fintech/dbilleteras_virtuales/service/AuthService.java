@@ -45,8 +45,10 @@ public class AuthService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .phoneNumber(request.getPhone())
+                .documentNumber(request.getDocumentNumber())
                 .isActive(false)
                 .verificationToken(verificationToken)
+                .role(Role.USER)
                 .build();
 
         // Guardar usuario en la base de datos
