@@ -74,20 +74,11 @@ public class ScheduledOperationService {
                             operation.getAmount());
                     break;
                 case TRANSFER:
-                    if (operation.getReceiverUserId() != null) {
-                        transactionService.transfer(
-                                operation.getUserId(),
-                                operation.getReceiverUserId(),
-                                operation.getSourceWalletId(),
-                                operation.getTargetWalletId(),
-                                operation.getAmount());
-                    } else {
-                        transactionService.transfer(
-                                operation.getUserId(),
-                                operation.getSourceWalletId(),
-                                operation.getTargetWalletId(),
-                                operation.getAmount());
-                    }
+                    transactionService.transfer(
+                            operation.getUserId(),
+                            operation.getSourceWalletId(),
+                            operation.getTransferKey(),
+                            operation.getAmount());
                     break;
                 default:
                     throw new RuntimeException("Tipo de operacion no disponible");

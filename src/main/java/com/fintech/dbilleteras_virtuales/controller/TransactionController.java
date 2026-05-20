@@ -55,10 +55,10 @@ public class TransactionController {
     }
 
     @PostMapping("/transfer-to-user")
-    public ResponseEntity<Transaction> transferToUser(@RequestParam String userId, @RequestParam String receiverUserId,
-            @RequestParam String sourceWallet, @RequestParam String targetWallet, @RequestParam double amount) {
+    public ResponseEntity<Transaction> transferToUser(@RequestParam String userId,
+            @RequestParam String sourceWallet, @RequestParam String transferkey, @RequestParam double amount) {
         return ResponseEntity
-                .ok(transactionService.transfer(userId, receiverUserId, sourceWallet, targetWallet, amount));
+                .ok(transactionService.transfer(userId, sourceWallet, transferkey, amount));
     }
 
     @PostMapping("historyTransactions")
