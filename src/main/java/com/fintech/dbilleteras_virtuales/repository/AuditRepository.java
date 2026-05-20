@@ -13,12 +13,12 @@ public interface AuditRepository extends MongoRepository<Audit, String> {
 
     List<Audit> findByDate(LocalDateTime date);
 
-    List<Audit> findByFechaBetween(LocalDateTime start, LocalDateTime end);
+    List<Audit> findByDateBetween(LocalDateTime start, LocalDateTime end);
 
     List<Audit> findByNivelRiesgo(String nivelRiesgo);
 
     List<Audit> findByUserIdAndDateBetween(String userId, LocalDateTime start, LocalDateTime end);
 
-    List<Audit> findByRiskLevelAndDateBetween(String riskLevel, LocalDateTime start, LocalDateTime end);
+    List<Audit> findByNivelRiesgoAndDateBetween(String nivelRiesgo, LocalDateTime start, LocalDateTime end);
 
 }

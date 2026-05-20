@@ -8,7 +8,6 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.fintech.dbilleteras_virtuales.model.Audit;
-import com.fintech.dbilleteras_virtuales.service.TransactionService;
 import com.fintech.dbilleteras_virtuales.repository.AuditRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -18,14 +17,7 @@ import lombok.RequiredArgsConstructor;
 
 public class AuditService {
 
-    private final TransactionService transactionService;
     private final AuditRepository auditRepository;
-
-    private String transaccionId;
-    private String userId;
-    private String auditId;
-    private String nivelRiesgo;
-    private String descripcion;
 
     public List<Audit> getAuditsByUser(String userId) {
         return auditRepository.findByUserId(userId);
@@ -61,7 +53,7 @@ public class AuditService {
         LocalDateTime firtHour = LocalDateTime.parse(firs);
         LocalDateTime secondHour = LocalDateTime.parse(second);
 
-        List<Audit> audits = auditRepository.findByFechaBetween(firtHour, secondHour);
+        List<Audit> audits = auditRepository.findByDateBetween(firtHour, secondHour);
 
         return audits;
 
@@ -70,7 +62,7 @@ public class AuditService {
     public List<Audit> AuditsToday() {
         LocalDateTime start = LocalDate.now().atStartOfDay();
         LocalDateTime end = LocalDate.now().atTime(23, 59, 59);
-        return auditRepository.findByFechaBetween(start, end);
+        return auditRepository.findByDateBetween(start, end);
     }
 
     public LinkedList<Audit> AuditsLowLevel(String nivelRiesgo) {
@@ -99,7 +91,7 @@ public class AuditService {
         LocalDateTime startDate = LocalDateTime.parse(start);
 
         LocalDateTime endDate = LocalDateTime.parse(end);
-        return auditRepository.findByRiskLevelAndDateBetween(riskLevel, startDate, endDate);
+        return auditRepository.findByNivelRiesgoAndDateBetween(riskLevel, startDate, endDate);
     }
 
 }

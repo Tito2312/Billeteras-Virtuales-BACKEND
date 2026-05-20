@@ -456,7 +456,7 @@ public class TransactionService {
 
         Stack<Transaction> transactions = apilarTransaccionRevertir(userId);
 
-        if (!transactions.isEmpty()) {
+        if (transactions.isEmpty()) {
             return null;
         }
 
