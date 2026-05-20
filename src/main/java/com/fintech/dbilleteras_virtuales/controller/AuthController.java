@@ -13,8 +13,6 @@ import com.fintech.dbilleteras_virtuales.dto.AuthResponse;
 import com.fintech.dbilleteras_virtuales.dto.LoginRequest;
 import com.fintech.dbilleteras_virtuales.dto.RegisterRequest;
 import com.fintech.dbilleteras_virtuales.service.AuthService;
-import com.fintech.dbilleteras_virtuales.model.User;
-import com.fintech.dbilleteras_virtuales.repository.UserRepository;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
