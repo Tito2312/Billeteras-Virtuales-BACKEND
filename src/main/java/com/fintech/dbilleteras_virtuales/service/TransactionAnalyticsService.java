@@ -184,7 +184,7 @@ public class TransactionAnalyticsService {
                     auditService.registrarEvento(
                             userId,
                             firsNodo.getNodeValue().getId(),
-                            "MEDIO",
+                            "BAJO",
                             "Actividad nocturna inusual detectada");
 
                 }

@@ -9,6 +9,8 @@ import com.fintech.dbilleteras_virtuales.service.TransactionService;
 import com.fintech.dbilleteras_virtuales.dataStructure.Stack;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api/transactions")
@@ -46,9 +48,8 @@ public class TransactionController {
     }
 
     @PostMapping("transactiosDateRange")
-    public ResponseEntity<List<Transaction>> dateRange(@RequestBody String walletId, @RequestBody String dateFirst,
-            @RequestBody String dateLast) {
-        // TODO: process POST request
+    public ResponseEntity<List<Transaction>> dateRange(@RequestParam String walletId, @RequestParam String dateFirst,
+            @RequestParam String dateLast) {
 
         return ResponseEntity.ok(transactionService.getTransactionsByWalletAndDateRange(walletId, dateFirst, dateLast));
     }
@@ -67,7 +68,7 @@ public class TransactionController {
     }
 
     @PutMapping("/wallet-transaction")
-    public ResponseEntity<List<Transaction>> wallettransaction(@PathVariable String walletId) {
+    public ResponseEntity<List<Transaction>> wallettransaction(@RequestParam String walletId) {
 
         return ResponseEntity.ok(transactionService.listWalletsTransactions(walletId));
     }
@@ -90,7 +91,13 @@ public class TransactionController {
     }
 
     @GetMapping("/wallet/{walletId}")
-    public ResponseEntity<List<Transaction>> getHistoryByWalletId(@RequestParam String walletId) {
+    public ResponseEntity<List<Transaction>> getHistoryByWalletId(@PathVariable String walletId) {
         return ResponseEntity.ok(transactionService.getHistoryByWalletId(walletId));
     }
+
+    @GetMapping("/queeue")
+    public ResponseEntity HistoryQueueReverseTransactions(@RequestParam String userId) {
+        return ResponseEntity.ok(transactionService.historyCola(userId));
+    }
+
 }

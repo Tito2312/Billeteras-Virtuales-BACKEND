@@ -53,7 +53,8 @@ public class ReportService {
     }
 
     private void sortByCountDesc(LinkedList<EntryCount> list) {
-        if (list.getSize() <= 1) return;
+        if (list.getSize() <= 1)
+            return;
         boolean swapped;
         do {
             swapped = false;
@@ -75,7 +76,8 @@ public class ReportService {
         List<Transaction> all = transactionRepository.findAll();
 
         LinkedList<Transaction> txList = new LinkedList<>();
-        for (Transaction t : all) txList.add(t);
+        for (Transaction t : all)
+            txList.add(t);
 
         LinkedList<EntryCount> count = new LinkedList<>();
 
@@ -119,7 +121,8 @@ public class ReportService {
         List<Transaction> transfers = transactionRepository.findByType(TransactionType.TRANSFER);
 
         LinkedList<Transaction> txList = new LinkedList<>();
-        for (Transaction t : transfers) txList.add(t);
+        for (Transaction t : transfers)
+            txList.add(t);
 
         LinkedList<EntryCount> count = new LinkedList<>();
 
@@ -139,14 +142,13 @@ public class ReportService {
         int i = 0;
         while (nodeC != null && i < topN) {
             EntryCount p = nodeC.getNodeValue();
-            userRepository.findById(p.key).ifPresent(user ->
-                    result.add(ReportDto.UserTransferReport.builder()
-                            .userId(user.getId())
-                            .userName(user.getName())
-                            .userEmail(user.getEmail())
-                            .transferCount(p.count)
-                            .totalTransferred(p.totalAmount)
-                            .build()));
+            userRepository.findById(p.key).ifPresent(user -> result.add(ReportDto.UserTransferReport.builder()
+                    .userId(user.getId())
+                    .userName(user.getName())
+                    .userEmail(user.getEmail())
+                    .transferCount(p.count)
+                    .totalTransferred(p.totalAmount)
+                    .build()));
             nodeC = nodeC.getNextNode();
             i++;
         }
@@ -158,10 +160,12 @@ public class ReportService {
         List<Transaction> allTransactions = transactionRepository.findAll();
 
         LinkedList<Wallet> walletList = new LinkedList<>();
-        for (Wallet w : allWallets) walletList.add(w);
+        for (Wallet w : allWallets)
+            walletList.add(w);
 
         LinkedList<Transaction> txList = new LinkedList<>();
-        for (Transaction t : allTransactions) txList.add(t);
+        for (Transaction t : allTransactions)
+            txList.add(t);
 
         LinkedList<EntryCount> categoryCount = new LinkedList<>();
 
@@ -206,7 +210,8 @@ public class ReportService {
         List<Transaction> all = transactionRepository.findAll();
 
         LinkedList<Transaction> txList = new LinkedList<>();
-        for (Transaction t : all) txList.add(t);
+        for (Transaction t : all)
+            txList.add(t);
 
         LinkedList<EntryCount> count = new LinkedList<>();
 
@@ -239,7 +244,8 @@ public class ReportService {
         List<Transaction> transactions = transactionRepository.findByCreatedAtBetween(start, end);
 
         LinkedList<Transaction> txList = new LinkedList<>();
-        for (Transaction t : transactions) txList.add(t);
+        for (Transaction t : transactions)
+            txList.add(t);
 
         double totalAmount = 0;
         LinkedList<EntryCount> typeCount = new LinkedList<>();
@@ -269,8 +275,43 @@ public class ReportService {
                 .build();
     }
 
+    public List<Transaction> getTopTransactionsByAmount(int topN) {
+        List<Transaction> all = transactionRepository.findAll();
+
+        LinkedList<Transaction> txList = new LinkedList<>();
+        for (Transaction t : all)
+            txList.add(t);
+
+        boolean swapped;
+        do {
+            swapped = false;
+            ListNode<Transaction> node = txList.firstNode();
+            while (node != null && node.getNextNode() != null) {
+                Transaction current = node.getNodeValue();
+                Transaction next = node.getNextNode().getNodeValue();
+                if (current.getAmount() < next.getAmount()) {
+                    node.setNodeValue(next);
+                    node.getNextNode().setNodeValue(current);
+                    swapped = true;
+                }
+                node = node.getNextNode();
+            }
+        } while (swapped);
+
+        List<Transaction> result = new ArrayList<>();
+        ListNode<Transaction> node = txList.firstNode();
+        int i = 0;
+        while (node != null && i < topN) {
+            result.add(node.getNodeValue());
+            node = node.getNextNode();
+            i++;
+        }
+        return result;
+    }
+
     private String resolveWalletType(LinkedList<Wallet> walletList, String walletId) {
-        if (walletId == null) return "Unknown";
+        if (walletId == null)
+            return "Unknown";
         ListNode<Wallet> node = walletList.firstNode();
         while (node != null) {
             if (node.getNodeValue().getId().equals(walletId)) {

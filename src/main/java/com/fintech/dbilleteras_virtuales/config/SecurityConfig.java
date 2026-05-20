@@ -54,6 +54,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/chatGpt").permitAll()
                 .requestMatchers("/api/graph/**").hasRole("ADMIN")
                 .requestMatchers("/api/hashtable/**").hasRole("ADMIN")
                 .requestMatchers("/api/tree/**").hasRole("ADMIN")

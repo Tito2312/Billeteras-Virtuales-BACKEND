@@ -42,7 +42,7 @@ public class User implements UserDetails {
     private LocalDate registrationDate = LocalDate.now();
     private boolean isActive = false;
     private String verificationToken;
-    private Role role = Role.USER;
+    private Role role = Role.ROLE_USER;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

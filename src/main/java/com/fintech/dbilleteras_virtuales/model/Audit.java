@@ -11,6 +11,7 @@ import lombok.*;
 @Data
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 
 public class Audit {
     @Id
@@ -24,6 +25,6 @@ public class Audit {
 
     private String descripcion;
 
-    private LocalDateTime fecha;
+    private LocalDateTime date;
 
 }
