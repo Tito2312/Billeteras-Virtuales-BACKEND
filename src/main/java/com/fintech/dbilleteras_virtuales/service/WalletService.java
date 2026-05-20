@@ -135,4 +135,11 @@ public class WalletService {
     String cleanName = walletName.trim().toLowerCase().replace(" ", "");
     return cleanName + documentNumber;
     }
+
+    public Wallet findByTransferKey(String transferKey){
+        
+        return walletRepository.findBytransferKey(transferKey)
+            .orElseThrow(() -> new RuntimeException("billetera no encontrada"));
+        
+    }
 }

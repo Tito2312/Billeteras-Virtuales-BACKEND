@@ -18,9 +18,9 @@ public class ScheduledOperation {
     private String id;
 
     private String userId;
-    private String receiverUserId;
     private String sourceWalletId;
     private String targetWalletId;
+    private String transferKey;
     private TransactionType type;
     private double amount;
     private LocalDateTime scheduledDate;
