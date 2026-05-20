@@ -70,7 +70,8 @@ public class AuthService {
         String token = jwtService.generateToken(savedUser);
         logger.info("🎫 Token JWT generado para: {}", savedUser.getEmail());
 
-        return new AuthResponse(token, savedUser.getId(), savedUser.getName(), savedUser.getLevel());
+        return new AuthResponse(token, savedUser.getId(), savedUser.getName(), savedUser.getLevel(),
+                user.getRole().toString());
     }
 
     public AuthResponse login(LoginRequest request) {
@@ -95,7 +96,7 @@ public class AuthService {
         String token = jwtService.generateToken(user);
         logger.info("✅ Login exitoso: {}", user.getEmail());
 
-        return new AuthResponse(token, user.getId(), user.getName(), user.getLevel());
+        return new AuthResponse(token, user.getId(), user.getName(), user.getLevel(), user.getRole().toString());
     }
 
     public void verifyEmail(String token) {

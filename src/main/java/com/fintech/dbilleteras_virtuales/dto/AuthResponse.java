@@ -10,4 +10,5 @@ public class AuthResponse {
     private String userId;
     private String name;
     private String level;
+    private String role;
 }
