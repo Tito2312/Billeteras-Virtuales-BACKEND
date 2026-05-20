@@ -18,7 +18,7 @@ public class LevelBenefitService {
         };
     }
 
-    public int getDailyTransactionLimit(String level) {
+    public static int getDailyTransactionLimit(String level) {
         return switch (level) {
             case "Bronze" -> 10;
             case "Silver" -> 25;

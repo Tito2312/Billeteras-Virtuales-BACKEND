@@ -19,7 +19,6 @@ public class Transaction {
 
     @Id
     private String id;
-
     private String userId;
     private String receiverUserId;
     private String sourceWallet;

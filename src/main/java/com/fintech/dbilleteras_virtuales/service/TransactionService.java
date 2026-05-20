@@ -9,7 +9,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.fintech.dbilleteras_virtuales.model.Transaction;
-
+import com.fintech.dbilleteras_virtuales.dataStructure.Queue;
 import com.fintech.dbilleteras_virtuales.model.TransactionStatus;
 import com.fintech.dbilleteras_virtuales.model.TransactionType;
 import com.fintech.dbilleteras_virtuales.model.Wallet;
@@ -96,7 +96,8 @@ public class TransactionService {
 
                 rewardService.updateUserPoints(userId, points);
                 notificationService.notificationTransaction(user.getEmail(), "RECARGA", amount);
-                TransactionAnalyticsService.anomalyDetection(userId, amount);
+                TransactionAnalyticsService.anomalyDetection(userId, amount, targetWallet);
+                TransactionAnalyticsService.detectNocturnalActivity(userId);
 
                 return savedTransaction;
 
@@ -165,6 +166,8 @@ public class TransactionService {
 
                 rewardService.updateUserPoints(userId, points);
                 notificationService.notificationTransaction(user.getEmail(), "RETIRO", amount);
+                TransactionAnalyticsService.anomalyDetection(userId, amount, sourceWallet);
+                TransactionAnalyticsService.detectNocturnalActivity(userId);
 
                 return savedTransaction;
 
@@ -243,6 +246,14 @@ public class TransactionService {
                 walletService.updateBalance(sourceWallet, userId, -amount);
                 walletService.updateBalance(targetWallet, userId, amount);
 
+                rewardService.updateUserPoints(userId, points);
+                notificationService.notificationTransaction(user.getEmail(), "TRANSFERENCIA", amount);
+                TransactionAnalyticsService.anomalyDetection(userId, amount, sourceWallet);
+                TransactionAnalyticsService.detectRepetitiveTransfers(userId);
+                TransactionAnalyticsService.detectFastTransfers(userId);
+                TransactionAnalyticsService.detectNocturnalActivity(userId);
+                return savedTransaction;
+
             } catch (Exception e) {
 
                 Transaction failedTransaction = new Transaction();
@@ -273,7 +284,6 @@ public class TransactionService {
         throw new RuntimeException("Transferencia fallida: ");
 
     }
-
 
     public Transaction reverseTransaction(String userId, String transactionId) {
         Transaction transaction = findById(transactionId);
@@ -362,7 +372,7 @@ public class TransactionService {
 
         Stack<Transaction> transactions = apilarTransaccionRevertir(userId);
 
-        if (!transactions.isEmpty()) {
+        if (transactions.isEmpty()) {
             return null;
         }
 
@@ -408,6 +418,25 @@ public class TransactionService {
                 .findBySourceWalletAndCreatedAtBetweenOrderByCreatedAtAsc(walletId, dateFist, dateLast);
 
         return transactionsDateRange;
+    }
+
+    public Queue<Transaction> historyCola(String userId) {
+
+        List<Transaction> transactions = transactionRepository.findByUserId(userId);
+        Queue<Transaction> queueTransactions = new Queue<>();
+
+        for (Transaction t : transactions) {
+
+            if (t.isReversed() == true) {
+
+                queueTransactions.enqueue(t);
+
+            }
+
+        }
+
+        return queueTransactions;
+
     }
 
 }

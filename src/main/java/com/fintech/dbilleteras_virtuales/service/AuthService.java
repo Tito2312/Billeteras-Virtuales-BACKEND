@@ -21,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 public class AuthService {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
-    
+
     private final UserRepository userRepository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
@@ -29,7 +29,7 @@ public class AuthService {
 
     public AuthResponse register(RegisterRequest request) {
         logger.info("📝 Intentando registrar usuario: {}", request.getEmail());
-        
+
         // Verificar si el email ya existe
         if (userRepository.existsByEmail(request.getEmail())) {
             logger.warn("❌ Email ya registrado: {}", request.getEmail());
@@ -49,7 +49,7 @@ public class AuthService {
                 .documentNumber(request.getDocumentNumber())
                 .isActive(false)
                 .verificationToken(verificationToken)
-                .role(Role.USER)
+                .role(Role.ROLE_USER)
                 .build();
 
         // Guardar usuario en la base de datos
@@ -69,13 +69,14 @@ public class AuthService {
         // Generar token JWT
         String token = jwtService.generateToken(savedUser);
         logger.info("🎫 Token JWT generado para: {}", savedUser.getEmail());
-        
-        return new AuthResponse(token, savedUser.getId(), savedUser.getName(), savedUser.getLevel());
+
+        return new AuthResponse(token, savedUser.getId(), savedUser.getName(), savedUser.getLevel(),
+                user.getRole().toString());
     }
 
     public AuthResponse login(LoginRequest request) {
         logger.info("🔐 Intento de login: {}", request.getEmail());
-        
+
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> {
                     logger.warn("❌ Usuario no encontrado: {}", request.getEmail());
@@ -94,13 +95,13 @@ public class AuthService {
 
         String token = jwtService.generateToken(user);
         logger.info("✅ Login exitoso: {}", user.getEmail());
-        
-        return new AuthResponse(token, user.getId(), user.getName(), user.getLevel());
+
+        return new AuthResponse(token, user.getId(), user.getName(), user.getLevel(), user.getRole().toString());
     }
 
     public void verifyEmail(String token) {
         logger.info("🔍 Verificando email con token: {}", token);
-        
+
         User user = userRepository.findByVerificationToken(token)
                 .orElseThrow(() -> {
                     logger.warn("❌ Token de verificación inválido: {}", token);
@@ -115,7 +116,7 @@ public class AuthService {
         user.setActive(true);
         user.setVerificationToken(null);
         userRepository.save(user);
-        
+
         logger.info("✅ Cuenta verificada exitosamente: {}", user.getEmail());
     }
 }
