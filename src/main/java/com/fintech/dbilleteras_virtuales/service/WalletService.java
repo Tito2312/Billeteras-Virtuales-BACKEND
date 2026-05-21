@@ -136,8 +136,7 @@ public class WalletService {
     }
 
     private String generateTransferKey(String walletName, String documentNumber) {
-    
-    String cleanName = walletName.trim().toLowerCase().replace(" ", "");
-    return cleanName + documentNumber;
+        String cleanName = walletName.trim().toLowerCase().replace(" ", "");
+        return cleanName + documentNumber;
     }
 }

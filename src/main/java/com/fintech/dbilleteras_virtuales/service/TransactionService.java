@@ -12,6 +12,7 @@ import com.fintech.dbilleteras_virtuales.model.Transaction;
 import com.fintech.dbilleteras_virtuales.dataStructure.Queue;
 import com.fintech.dbilleteras_virtuales.model.TransactionStatus;
 import com.fintech.dbilleteras_virtuales.model.TransactionType;
+import com.fintech.dbilleteras_virtuales.model.Wallet;
 import com.fintech.dbilleteras_virtuales.repository.TransactionRepository;
 import com.fintech.dbilleteras_virtuales.repository.UserRepository;
 import com.fintech.dbilleteras_virtuales.dataStructure.Stack;
@@ -200,20 +201,26 @@ public class TransactionService {
 
     }
 
-    public Transaction transfer(String userId, String sourceWallet, String targetWallet, double amount) {
-        if (validateTransaction(userId)) {
-            try {
+    public Transaction transfer(String userId, String sourceWallet, String transferKey, double amount) {
+    String targetWallet = null;
+    String receiverUserId = null;
 
-                if (amount <= 0) {
-                    throw new RuntimeException("El monto debe ser mayor a cero");
-                }
+    if (validateTransaction(userId)) {
+        try {
+            Wallet targetWalletObj = walletService.findByTransferKey(transferKey);
+            targetWallet = targetWalletObj.getId();
+            receiverUserId = targetWalletObj.getUserId();
 
-                if (sourceWallet.equals(targetWallet)) {
-                    throw new RuntimeException("No se puede transferir a la misma billetera");
-                }
+            if (amount <= 0) {
+                throw new RuntimeException("El monto debe ser mayor a cero");
+            }
 
-                var user = userRepository.findById(userId)
-                        .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+            if (sourceWallet.equals(targetWallet)) {
+                throw new RuntimeException("No se puede transferir a la misma billetera");
+            }
+
+            var user = userRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
                 if (!walletService.hasSufficientBalance(sourceWallet, userId, amount)) {
                     throw new RuntimeException("Saldo insuficiente en la billetera origen");
@@ -276,97 +283,6 @@ public class TransactionService {
         }
         throw new RuntimeException("Transferencia fallida: ");
 
-    }
-
-    public Transaction transfer(String userId, String receiverUserId, String sourceWallet, String targetWallet,
-            double amount) {
-        if (validateTransaction(userId)) {
-            try {
-
-                if (amount <= 0) {
-                    throw new RuntimeException("El monto debe ser mayor a cero");
-                }
-
-                if (sourceWallet.equals(targetWallet)) {
-                    throw new RuntimeException("No se puede transferir a la misma billetera");
-                }
-
-                if (userId.equals(receiverUserId)) {
-                    throw new RuntimeException(
-                            "Use el método de transferencia interna para transferencias entre sus propias billeteras");
-                }
-
-                var user = userRepository.findById(userId)
-                        .orElseThrow(() -> new RuntimeException("Usuario remitente no encontrado"));
-
-                var user2 = userRepository.findById(receiverUserId)
-                        .orElseThrow(() -> new RuntimeException("Usuario destinatario no encontrado"));
-
-                if (!walletService.hasSufficientBalance(sourceWallet, userId, amount)) {
-                    throw new RuntimeException("Saldo insuficiente en la billetera origen");
-                }
-
-                walletService.validateWalletExists(sourceWallet, userId);
-                walletService.validateWalletExistsForOwner(targetWallet, receiverUserId);
-
-                Transaction transaction = new Transaction();
-                transaction.setUserId(userId);
-                transaction.setReceiverUserId(receiverUserId);
-                transaction.setSourceWallet(sourceWallet);
-                transaction.setTargetWallet(targetWallet);
-                transaction.setAmount(amount);
-                transaction.setCreatedAt(LocalDateTime.now());
-                transaction.setType(TransactionType.TRANSFER);
-                transaction.setStatus(TransactionStatus.COMPLETED);
-
-                int points = rewardService.calculatePoints(transaction.getType(), amount);
-                transaction.setPoints(points);
-
-                Transaction savedTransaction = transactionRepository.save(transaction);
-
-                walletService.updateBalance(sourceWallet, userId, -amount);
-                walletService.updateBalance(targetWallet, receiverUserId, amount);
-
-                rewardService.updateUserPoints(userId, points);
-                notificationService.TransferNotification(user.getEmail(), user.getName(), user2.getEmail(),
-                        user2.getName(),
-                        amount);
-                TransactionAnalyticsService.anomalyDetection(userId, amount, sourceWallet);
-                TransactionAnalyticsService.detectRepetitiveTransfers(userId);
-                TransactionAnalyticsService.detectFastTransfers(userId);
-                TransactionAnalyticsService.detectNocturnalActivity(userId);
-                return savedTransaction;
-
-            } catch (Exception e) {
-
-                Transaction failedTransaction = new Transaction();
-                failedTransaction.setUserId(userId);
-                failedTransaction.setReceiverUserId(receiverUserId);
-                failedTransaction.setSourceWallet(sourceWallet);
-                failedTransaction.setTargetWallet(targetWallet);
-                failedTransaction.setAmount(amount);
-                failedTransaction.setCreatedAt(LocalDateTime.now());
-                failedTransaction.setType(TransactionType.TRANSFER);
-                failedTransaction.setStatus(TransactionStatus.FAILED);
-                failedTransaction.setPoints(0);
-
-                transactionRepository.save(failedTransaction);
-
-                try {
-                    var user = userRepository.findById(userId).orElse(null);
-                    if (user != null) {
-                        notificationService.rejetedTransaction(user.getEmail(), "TRANSFERENCIA");
-                    }
-                } catch (Exception notificationEx) {
-                    System.err.println("Error enviando notificación de rechazo: " + notificationEx.getMessage());
-                }
-
-                throw new RuntimeException("Transferencia fallida: " + e.getMessage());
-            }
-
-        }
-
-        throw new RuntimeException("Transferencia fallida: ");
     }
 
     public Transaction reverseTransaction(String userId, String transactionId) {

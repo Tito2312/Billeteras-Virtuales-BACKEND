@@ -106,6 +106,7 @@ public class ReportService {
             Optional<Wallet> wallet = walletRepository.findById(p.key);
             result.add(ReportDto.WalletUsageReport.builder()
                     .walletId(p.key)
+                    .userId(wallet.map(Wallet::getUserId).orElse(null))
                     .walletName(wallet.map(Wallet::getName).orElse("Unknown"))
                     .walletType(wallet.map(Wallet::getType).orElse("Unknown"))
                     .transactionCount(p.count)

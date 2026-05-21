@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.fintech.dbilleteras_virtuales.model.Transaction;
 import com.fintech.dbilleteras_virtuales.service.TransactionService;
-import com.fintech.dbilleteras_virtuales.dataStructure.Stack;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -55,10 +54,10 @@ public class TransactionController {
     }
 
     @PostMapping("/transfer-to-user")
-    public ResponseEntity<Transaction> transferToUser(@RequestParam String userId, @RequestParam String receiverUserId,
-            @RequestParam String sourceWallet, @RequestParam String targetWallet, @RequestParam double amount) {
+    public ResponseEntity<Transaction> transferToUser(@RequestParam String userId,
+            @RequestParam String sourceWallet, @RequestParam String transferkey, @RequestParam double amount) {
         return ResponseEntity
-                .ok(transactionService.transfer(userId, receiverUserId, sourceWallet, targetWallet, amount));
+                .ok(transactionService.transfer(userId, sourceWallet, transferkey, amount));
     }
 
     @PostMapping("historyTransactions")
