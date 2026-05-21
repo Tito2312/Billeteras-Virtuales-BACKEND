@@ -64,4 +64,8 @@ public class WalletController {
         return ResponseEntity.ok(walletService.deactivate(id, userId));
     }
 
+    @getMapping("/transfer-key")
+    public ResponseEntity<Wallet> findByTransferKey(@RequestParam String transferKey) {
+        return ResponseEntity.ok(walletService.findByTransferKey(transferKey));
+    }
 }
