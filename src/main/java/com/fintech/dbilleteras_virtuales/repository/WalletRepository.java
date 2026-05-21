@@ -9,6 +9,5 @@ import com.fintech.dbilleteras_virtuales.model.Wallet;
 
 public interface WalletRepository extends MongoRepository<Wallet, String> {
     List<Wallet> findAllByUserId(String userId);
-    List<Wallet> findByid(String id);
-    Optional<Wallet> findBytransferKey(String transferKey);
+    Optional<Wallet> findByTransferKey(String transferKey);
 }
