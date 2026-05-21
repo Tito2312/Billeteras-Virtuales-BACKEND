@@ -130,6 +130,11 @@ public class WalletService {
         return wallet;
     }
 
+    public Wallet findByTransferKey(String transferKey) {
+        return walletRepository.findByTransferKey(transferKey)
+                .orElseThrow(() -> new IllegalArgumentException("Billetera no encontrada con esa clave de transferencia"));
+    }
+
     private String generateTransferKey(String walletName, String documentNumber) {
     
     String cleanName = walletName.trim().toLowerCase().replace(" ", "");
