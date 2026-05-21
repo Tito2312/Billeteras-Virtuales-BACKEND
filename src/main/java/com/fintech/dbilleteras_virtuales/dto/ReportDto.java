@@ -16,6 +16,7 @@ public class ReportDto {
     @AllArgsConstructor
     public static class WalletUsageReport {
         private String walletId;
+        private String userId;
         private String walletName;
         private String walletType;
         private long transactionCount;
