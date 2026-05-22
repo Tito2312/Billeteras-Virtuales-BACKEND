@@ -83,6 +83,8 @@ public class TransactionService {
                 transaction.setUserId(userId);
                 transaction.setTargetWallet(targetWallet);
                 transaction.setAmount(amount);
+                transaction.setOriginalAmount(amount);
+                transaction.setCommissionAmount(0);
                 transaction.setCreatedAt(LocalDateTime.now());
                 transaction.setType(TransactionType.RECHARGE);
                 transaction.setStatus(TransactionStatus.COMPLETED);
@@ -107,6 +109,8 @@ public class TransactionService {
                 failedTransaction.setUserId(userId);
                 failedTransaction.setTargetWallet(targetWallet);
                 failedTransaction.setAmount(amount);
+                failedTransaction.setOriginalAmount(amount);
+                failedTransaction.setCommissionAmount(0);
                 failedTransaction.setCreatedAt(LocalDateTime.now());
                 failedTransaction.setType(TransactionType.RECHARGE);
                 failedTransaction.setStatus(TransactionStatus.FAILED);
@@ -153,6 +157,8 @@ public class TransactionService {
                 transaction.setUserId(userId);
                 transaction.setSourceWallet(sourceWallet);
                 transaction.setAmount(amount);
+                transaction.setOriginalAmount(amount);
+                transaction.setCommissionAmount(0);
                 transaction.setCreatedAt(LocalDateTime.now());
                 transaction.setType(TransactionType.WITHDRAWAL);
                 transaction.setStatus(TransactionStatus.COMPLETED);
@@ -177,6 +183,8 @@ public class TransactionService {
                 failedTransaction.setUserId(userId);
                 failedTransaction.setSourceWallet(sourceWallet);
                 failedTransaction.setAmount(amount);
+                failedTransaction.setOriginalAmount(amount);
+                failedTransaction.setCommissionAmount(0);
                 failedTransaction.setCreatedAt(LocalDateTime.now());
                 failedTransaction.setType(TransactionType.WITHDRAWAL);
                 failedTransaction.setStatus(TransactionStatus.FAILED);
@@ -201,90 +209,136 @@ public class TransactionService {
 
     }
 
+    private double getCommissionRateByLevel(String level) {
+    System.out.println("🔍 Nivel del usuario: " + level); 
+    switch(level) {
+        case "Bronce": return 0.05;
+        case "Plata": return 0.03;
+        case "Silver": return 0.03; 
+        case "Oro": return 0.015;
+        case "Gold": return 0.015; 
+        case "Platino": return 0.0;
+        case "Platinum": return 0.0;
+        default: return 0.05;
+    }
+}
+
+
     public Transaction transfer(String userId, String sourceWallet, String transferKey, double amount) {
-    String targetWallet = null;
-    String receiverUserId = null;
+        if (!validateTransaction(userId)) {
+            throw new RuntimeException("Límite de transacciones diarias alcanzado");
+        }
 
-    if (validateTransaction(userId)) {
         try {
-            Wallet targetWalletObj = walletService.findByTransferKey(transferKey);
-            targetWallet = targetWalletObj.getId();
-            receiverUserId = targetWalletObj.getUserId();
-
             if (amount <= 0) {
                 throw new RuntimeException("El monto debe ser mayor a cero");
             }
 
+        
+            Wallet targetWalletObj = walletService.findByTransferKey(transferKey);
+            if (targetWalletObj == null) {
+                throw new RuntimeException("Billetera destino no encontrada con esa clave");
+            }
+            
+            String targetWallet = targetWalletObj.getId();
+            String receiverUserId = targetWalletObj.getUserId();
+
+         
             if (sourceWallet.equals(targetWallet)) {
                 throw new RuntimeException("No se puede transferir a la misma billetera");
             }
 
-            var user = userRepository.findById(userId)
-                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        
+            if (!walletService.hasSufficientBalance(sourceWallet, userId, amount)) {
+                throw new RuntimeException("Saldo insuficiente en la billetera origen");
+            }
+            walletService.validateWalletExists(sourceWallet, userId);
 
-                if (!walletService.hasSufficientBalance(sourceWallet, userId, amount)) {
-                    throw new RuntimeException("Saldo insuficiente en la billetera origen");
-                }
-
-                walletService.validateWalletExists(sourceWallet, userId);
-                walletService.validateWalletExists(targetWallet, userId);
-
-                Transaction transaction = new Transaction();
-                transaction.setUserId(userId);
-                transaction.setSourceWallet(sourceWallet);
-                transaction.setTargetWallet(targetWallet);
-                transaction.setAmount(amount);
-                transaction.setCreatedAt(LocalDateTime.now());
-                transaction.setType(TransactionType.TRANSFER);
-                transaction.setStatus(TransactionStatus.COMPLETED);
-
-                int points = rewardService.calculatePoints(transaction.getType(), amount);
-                transaction.setPoints(points);
-
-                Transaction savedTransaction = transactionRepository.save(transaction);
-
-                walletService.updateBalance(sourceWallet, userId, -amount);
-                walletService.updateBalance(targetWallet, userId, amount);
-
-                rewardService.updateUserPoints(userId, points);
-                notificationService.notificationTransaction(user.getEmail(), "TRANSFERENCIA", amount);
-                TransactionAnalyticsService.anomalyDetection(userId, amount, sourceWallet);
-                TransactionAnalyticsService.detectRepetitiveTransfers(userId);
-                TransactionAnalyticsService.detectFastTransfers(userId);
-                TransactionAnalyticsService.detectNocturnalActivity(userId);
-                return savedTransaction;
-
-            } catch (Exception e) {
-
-                Transaction failedTransaction = new Transaction();
-                failedTransaction.setUserId(userId);
-                failedTransaction.setSourceWallet(sourceWallet);
-                failedTransaction.setTargetWallet(targetWallet);
-                failedTransaction.setAmount(amount);
-                failedTransaction.setCreatedAt(LocalDateTime.now());
-                failedTransaction.setType(TransactionType.TRANSFER);
-                failedTransaction.setStatus(TransactionStatus.FAILED);
-                failedTransaction.setPoints(0);
-
-                transactionRepository.save(failedTransaction);
-
-                try {
-                    var user = userRepository.findById(userId).orElse(null);
-                    if (user != null) {
-                        notificationService.rejetedTransaction(user.getEmail(), "TRANSFERENCIA");
-                    }
-                } catch (Exception notificationEx) {
-                    System.err.println("Error enviando notificación de rechazo: " + notificationEx.getMessage());
-                }
-
-                throw new RuntimeException("Transferencia fallida: " + e.getMessage());
+         
+            if (!targetWalletObj.isActive()) {
+                throw new RuntimeException("La billetera destino está inactiva");
             }
 
-        }
-        throw new RuntimeException("Transferencia fallida: ");
+            
+            var user = userRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+            double commissionRate = getCommissionRateByLevel(user.getLevel());
+            double commissionAmount = amount * commissionRate;
+            double receiverAmount = amount - commissionAmount;  // Lo que realmente recibe el destino
 
+            // 6. Crear transacción
+            Transaction transaction = new Transaction();
+            transaction.setUserId(userId);
+            transaction.setReceiverUserId(receiverUserId);
+            transaction.setSourceWallet(sourceWallet);
+            transaction.setTargetWallet(targetWallet);
+            transaction.setAmount(receiverAmount);              // Monto que recibe el destinatario
+            transaction.setOriginalAmount(amount);              // Monto original enviado
+            transaction.setCommissionAmount(commissionAmount);  // Comisión cobrada
+            transaction.setCreatedAt(LocalDateTime.now());
+            transaction.setType(TransactionType.TRANSFER);
+            transaction.setStatus(TransactionStatus.COMPLETED);
+
+            int points = rewardService.calculatePoints(transaction.getType(), amount);
+            transaction.setPoints(points);
+
+            // 7. Guardar transacción
+            Transaction savedTransaction = transactionRepository.save(transaction);
+
+            // 8. Actualizar balances
+            walletService.updateBalance(sourceWallet, userId, -amount);                     // Remitente pierde el monto original
+            walletService.updateBalance(targetWallet, receiverUserId, receiverAmount);      // Destino recibe el monto con comisión descontada
+
+            // 9. Actualizar puntos del remitente
+            rewardService.updateUserPoints(userId, points);
+
+            // 10. Notificaciones
+            if (user != null) {
+                notificationService.notificationTransaction(user.getEmail(), "TRANSFERENCIA ENVIADA", amount);
+            }
+            
+            // Notificar al receptor
+            var receiver = userRepository.findById(receiverUserId).orElse(null);
+            if (receiver != null) {
+                notificationService.notificationTransaction(receiver.getEmail(), "TRANSFERENCIA RECIBIDA", receiverAmount);
+            }
+            
+            // 11. Detección de anomalías
+            TransactionAnalyticsService.anomalyDetection(userId, amount, sourceWallet);
+            TransactionAnalyticsService.detectRepetitiveTransfers(userId);
+            TransactionAnalyticsService.detectFastTransfers(userId);
+            TransactionAnalyticsService.detectNocturnalActivity(userId);
+            
+            return savedTransaction;
+
+        } catch (Exception e) {
+            // Registrar transacción fallida
+            Transaction failedTransaction = new Transaction();
+            failedTransaction.setUserId(userId);
+            failedTransaction.setSourceWallet(sourceWallet);
+            failedTransaction.setAmount(amount);
+            failedTransaction.setOriginalAmount(amount);
+            failedTransaction.setCommissionAmount(0);
+            failedTransaction.setCreatedAt(LocalDateTime.now());
+            failedTransaction.setType(TransactionType.TRANSFER);
+            failedTransaction.setStatus(TransactionStatus.FAILED);
+            failedTransaction.setPoints(0);
+            transactionRepository.save(failedTransaction);
+
+            try {
+                var user = userRepository.findById(userId).orElse(null);
+                if (user != null) {
+                    notificationService.rejetedTransaction(user.getEmail(), "TRANSFERENCIA");
+                }
+            } catch (Exception notificationEx) {
+                System.err.println("Error enviando notificación de rechazo: " + notificationEx.getMessage());
+            }
+
+            throw new RuntimeException("Transferencia fallida: " + e.getMessage());
+        }
     }
 
+    // ✅ MÉTODO REVERSE TRANSACTION CORREGIDO
     public Transaction reverseTransaction(String userId, String transactionId) {
         Transaction transaction = findById(transactionId);
 
@@ -292,16 +346,27 @@ public class TransactionService {
             throw new RuntimeException("La transacción ya fue revertida");
         }
 
-        walletService.updateBalance(transaction.getSourceWallet(), userId, transaction.getAmount());
+        // Obtener el monto original que el remitente envió
+        double originalAmount = transaction.getOriginalAmount() > 0 ? 
+                                transaction.getOriginalAmount() : transaction.getAmount();
+        
+        // Calcular lo que el receptor debe devolver (el monto que realmente recibió)
+        double receiverReceived = transaction.getAmount();
+        double commissionPaid = transaction.getCommissionAmount() > 0 ? 
+                                transaction.getCommissionAmount() : (originalAmount - receiverReceived);
 
-        if (transaction.getTargetWallet() != null) {
-            walletService.updateBalance(transaction.getTargetWallet(), transaction.getReceiverUserId(),
-                    -transaction.getAmount());
+        // Devolver el dinero al remitente (el monto original que envió)
+        walletService.updateBalance(transaction.getSourceWallet(), transaction.getUserId(), originalAmount);
+
+        // Quitar el dinero del receptor (solo lo que realmente recibió)
+        if (transaction.getTargetWallet() != null && transaction.getReceiverUserId() != null) {
+            walletService.updateBalance(transaction.getTargetWallet(), transaction.getReceiverUserId(), -receiverReceived);
         }
 
         transaction.setReversed(true);
         transaction.setStatus(TransactionStatus.REVERSED);
 
+        // Revertir puntos (los puntos se calcularon sobre el monto original)
         rewardService.updateUserPoints(transaction.getUserId(), -transaction.getPoints());
 
         Transaction saveTransaction = transactionRepository.save(transaction);
@@ -311,12 +376,27 @@ public class TransactionService {
 
         notificationService.TransactionReverse(user.getEmail(), transaction.getPoints());
 
+        // Notificar al receptor que la transacción fue revertida
+        if (transaction.getReceiverUserId() != null) {
+            var receiver = userRepository.findById(transaction.getReceiverUserId()).orElse(null);
+            if (receiver != null) {
+                notificationService.notificationTransaction(receiver.getEmail(), "TRANSFERENCIA REVERTIDA", receiverReceived);
+            }
+        }
+
         return saveTransaction;
     }
 
     public List<Transaction> getHistoryByUserId(String userId) {
-        return transactionRepository.findByUserId(userId);
-    }
+    List<Transaction> asSender = transactionRepository.findByUserId(userId);
+    List<Transaction> asReceiver = transactionRepository.findByReceiverUserId(userId);
+    List<Transaction> allTransactions = new ArrayList<>();
+    allTransactions.addAll(asSender);
+    allTransactions.addAll(asReceiver);
+    allTransactions.sort((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()));
+    
+    return allTransactions;
+}
 
     public List<Transaction> getHistoryByWalletId(String walletId) {
         return transactionRepository.findBySourceWalletOrTargetWallet(walletId, walletId);

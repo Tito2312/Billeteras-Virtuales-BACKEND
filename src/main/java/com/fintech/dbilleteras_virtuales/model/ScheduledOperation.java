@@ -28,5 +28,4 @@ public class ScheduledOperation {
     private ScheduledOperationStatus status = ScheduledOperationStatus.PENDING;
     private String errorMessage;
     private LocalDateTime createdAt;
-
 }

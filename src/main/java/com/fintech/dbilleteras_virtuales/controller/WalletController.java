@@ -65,8 +65,8 @@ public class WalletController {
     }
 
     @GetMapping("/by-transfer-key")
-    public ResponseEntity<Wallet> findByTransferKey(@RequestParam String transferKey) {
-        return ResponseEntity.ok(walletService.findByTransferKey(transferKey));
-    }
+public ResponseEntity<Wallet> findByTransferKey(@RequestParam String transferKey) {
+    return ResponseEntity.ok(walletService.findByTransferKey(transferKey));
+}
 
 }

@@ -8,8 +8,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class DbilleterasVirtualesApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(DbilleterasVirtualesApplication.class, args);
-	}
+	 public static void main(String[] args) {
+        SpringApplication.run(DbilleterasVirtualesApplication.class, args);
+        System.out.println("🚀 Aplicación iniciada con scheduling habilitado");
+    }
 
 }

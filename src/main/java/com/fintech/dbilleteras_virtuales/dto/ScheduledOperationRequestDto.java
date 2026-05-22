@@ -8,7 +8,7 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 
 @Data
-public class ScheduledOperationRequestDto{
+public class ScheduledOperationRequestDto {
     
     @NotBlank(message = "El userId es obligatorio")
     private String userId;
@@ -16,6 +16,8 @@ public class ScheduledOperationRequestDto{
     private String sourceWalletId;
 
     private String targetWalletId;
+    
+    private String transferKey; 
 
     @NotNull(message = "El tipo de operación es obligatorio")
     private TransactionType type;

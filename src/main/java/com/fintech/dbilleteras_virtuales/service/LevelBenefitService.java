@@ -10,40 +10,40 @@ public class LevelBenefitService {
 
     public double getCommissionRate(String level) {
         return switch (level) {
-            case "Bronze" -> 0.05;
-            case "Silver" -> 0.03;
-            case "Gold" -> 0.015;
-            case "Platinum" -> 0.0;
+            case "Bronce", "Bronze" -> 0.05;
+            case "Plata", "Silver" -> 0.03;
+            case "Oro", "Gold" -> 0.015;
+            case "Platino", "Platinum" -> 0.0;
             default -> 0.05;
         };
     }
 
-    public static int getDailyTransactionLimit(String level) {
+    public int getDailyTransactionLimit(String level) {
         return switch (level) {
-            case "Bronze" -> 10;
-            case "Silver" -> 25;
-            case "Gold" -> 50;
-            case "Platinum" -> Integer.MAX_VALUE;
+            case "Bronce", "Bronze" -> 10;
+            case "Plata", "Silver" -> 25;
+            case "Oro", "Gold" -> 50;
+            case "Platino", "Platinum" -> Integer.MAX_VALUE;
             default -> 10;
         };
     }
 
     public double getPointsBonus(String level) {
         return switch (level) {
-            case "Bronze" -> 0.0;
-            case "Silver" -> 0.10;
-            case "Gold" -> 0.25;
-            case "Platinum" -> 0.50;
+            case "Bronce", "Bronze" -> 0.0;
+            case "Plata", "Silver" -> 0.10;
+            case "Oro", "Gold" -> 0.25;
+            case "Platino", "Platinum" -> 0.50;
             default -> 0.0;
         };
     }
 
     public int getProcessingPriority(String level) {
         return switch (level) {
-            case "Platinum" -> 1;
-            case "Gold" -> 2;
-            case "Silver" -> 3;
-            case "Bronze" -> 4;
+            case "Platino", "Platinum" -> 1;  // Prioridad más alta
+            case "Oro", "Gold" -> 2;
+            case "Plata", "Silver" -> 3;
+            case "Bronce", "Bronze" -> 4;      // Prioridad más baja
             default -> 4;
         };
     }
@@ -60,13 +60,13 @@ public class LevelBenefitService {
 
     public String getLevelBenefits(String level) {
         return switch (level) {
-            case "Bronze" ->
+            case "Bronce", "Bronze" ->
                 "Comisión: 5%, Sin bono de puntos";
-            case "Silver" ->
+            case "Plata", "Silver" ->
                 "Comisión: 3%, Bono de puntos: 10%";
-            case "Gold" ->
-                "$10000, Comisión: 1.5%, Bono de puntos: 25%, Prioridad media";
-            case "Platinum" ->
+            case "Oro", "Gold" ->
+                "Comisión: 1.5%, Bono de puntos: 25%, Prioridad media";
+            case "Platino", "Platinum" ->
                 "Comisión: 0%, Bono de puntos: 50%, Prioridad alta";
             default -> "Nivel no reconocido";
         };

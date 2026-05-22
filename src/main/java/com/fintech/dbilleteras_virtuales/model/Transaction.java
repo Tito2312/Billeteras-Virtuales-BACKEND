@@ -25,6 +25,8 @@ public class Transaction {
     private String targetWallet;
     private TransactionType type;
     private double amount;
+    private double originalAmount;     
+    private double commissionAmount;    
     private TransactionStatus status;
     private int points;
     private boolean reversed;
