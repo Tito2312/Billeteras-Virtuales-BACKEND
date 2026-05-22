@@ -1,10 +1,13 @@
 package com.fintech.dbilleteras_virtuales.service;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+import com.fintech.dbilleteras_virtuales.dataStructure.Queue;
 
 import com.fintech.dbilleteras_virtuales.model.Notification;
 import com.fintech.dbilleteras_virtuales.repository.NotificationRepository;
@@ -144,5 +147,25 @@ public class NotificationService {
         String subject = "🌙 Alerta: Actividad nocturna inusual";
         String message = "Hola,\n\nHemos detectado varias transacciones realizadas en horario nocturno, lo cual es inusual en tu historial.\n\nSi no reconoces estas operaciones, contacta a soporte de inmediato.\n\nSaludos,\nEquipo de Billeteras Virtuales";
         return sendEmail(message, subject, email);
+    }
+
+    public Queue<Notification> notificationQueue(String userId) {
+
+        List<Notification> notifications = notificationRepository.findByUserId(userId);
+
+        Queue<Notification> notificationsQueue = new Queue<Notification>();
+
+        for (Notification t : notifications) {
+
+            notificationsQueue.enqueue(t);
+
+        }
+
+        return notificationsQueue;
+
+    }
+
+    public void notificationQueueToday(String userId) {
+
     }
 }
