@@ -19,6 +19,7 @@ public class Notification {
 
     @Id
     private String id;
+    private String userId;
     private String asunto;
     private String message;
     private String email;

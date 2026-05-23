@@ -1,13 +1,18 @@
 package com.fintech.dbilleteras_virtuales.service;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+import com.fintech.dbilleteras_virtuales.dataStructure.Queue;
 
 import com.fintech.dbilleteras_virtuales.model.Notification;
+import com.fintech.dbilleteras_virtuales.model.User;
 import com.fintech.dbilleteras_virtuales.repository.NotificationRepository;
+import com.fintech.dbilleteras_virtuales.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -19,6 +24,7 @@ public class NotificationService {
 
     private final JavaMailSender mailSender;
     private final NotificationRepository notificationRepository;
+    private final UserRepository userRepository;
 
     public Notification sendEmail(String message, String subject, String addressee) {
         logger.info("📧 Intentando enviar email a: {}", addressee);
@@ -86,20 +92,6 @@ public class NotificationService {
         return sendEmail(message, subject, email);
     }
 
-    public Notification TransferNotification(String emailUser1, String name1, String emailUser2, String name2,
-            double amount) {
-        String subject1 = "✅ TRANSFERENCIA EXITOSA";
-        String message1 = "Hola " + name1 + ",\n\nHas transferido $" + String.format("%.2f", amount) + " a " + name2
-                + " exitosamente.\n\nSaludos,\nEquipo de Billeteras Virtuales";
-
-        String subject2 = "💰 HAS RECIBIDO UNA TRANSFERENCIA";
-        String message2 = "Hola " + name2 + ",\n\nHas recibido $" + String.format("%.2f", amount) + " de " + name1
-                + ".\n\nSaludos,\nEquipo de Billeteras Virtuales";
-
-        sendEmail(message2, subject2, emailUser2);
-        return sendEmail(message1, subject1, emailUser1);
-    }
-
     public Notification sendVerificationEmail(String email, String token) {
         String link = "http://localhost:3000/verify-email?token=" + token;
 
@@ -144,5 +136,26 @@ public class NotificationService {
         String subject = "🌙 Alerta: Actividad nocturna inusual";
         String message = "Hola,\n\nHemos detectado varias transacciones realizadas en horario nocturno, lo cual es inusual en tu historial.\n\nSi no reconoces estas operaciones, contacta a soporte de inmediato.\n\nSaludos,\nEquipo de Billeteras Virtuales";
         return sendEmail(message, subject, email);
+    }
+
+    public Queue<Notification> notificationQueue(String userId) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        List<Notification> notifications = notificationRepository.findByEmail(user.getEmail());
+
+        Queue<Notification> notificationsQueue = new Queue<Notification>();
+
+        for (Notification t : notifications) {
+            notificationsQueue.enqueue(t);
+        }
+
+        return notificationsQueue;
+
+    }
+
+    public void notificationQueueToday(String userId) {
+
     }
 }

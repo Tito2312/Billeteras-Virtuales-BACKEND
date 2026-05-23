@@ -8,4 +8,7 @@ import com.fintech.dbilleteras_virtuales.model.Notification;
 
 public interface NotificationRepository extends MongoRepository<Notification, String> {
     List<Notification> findByEmail(String email);
+
+    List<Notification> findByUserId(String userId);
+
 }

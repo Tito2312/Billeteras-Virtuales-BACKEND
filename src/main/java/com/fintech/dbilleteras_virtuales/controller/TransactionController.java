@@ -8,8 +8,6 @@ import com.fintech.dbilleteras_virtuales.model.Transaction;
 import com.fintech.dbilleteras_virtuales.service.TransactionService;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api/transactions")
@@ -96,7 +94,7 @@ public class TransactionController {
 
     @GetMapping("/queeue")
     public ResponseEntity HistoryQueueReverseTransactions(@RequestParam String userId) {
-        return ResponseEntity.ok(transactionService.historyCola(userId));
+        return ResponseEntity.ok(transactionService.historyQueue(userId).toList());
     }
 
 }

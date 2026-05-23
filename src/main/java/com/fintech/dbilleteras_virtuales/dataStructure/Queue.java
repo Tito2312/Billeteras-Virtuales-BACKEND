@@ -35,4 +35,18 @@ public class Queue<T> {
 
         return list.firstListNode.getNodeValue();
     }
+
+    public java.util.List<T> toList() {
+        java.util.List<T> result = new java.util.ArrayList<>();
+        ListNode<T> firstNode = list.firstListNode;
+        while (firstNode != null) {
+            result.add(firstNode.getNodeValue());
+            firstNode = firstNode.getNextNode();
+        }
+        return result;
+    }
+
+    public int size() {
+        return list.size;
+    }
 }
