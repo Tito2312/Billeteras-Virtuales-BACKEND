@@ -1,5 +1,7 @@
 package com.fintech.dbilleteras_virtuales.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -12,7 +14,9 @@ import com.fintech.dbilleteras_virtuales.dto.LoginRequest;
 import com.fintech.dbilleteras_virtuales.dto.RegisterRequest;
 import com.fintech.dbilleteras_virtuales.model.Role;
 import com.fintech.dbilleteras_virtuales.model.User;
+import com.fintech.dbilleteras_virtuales.model.Wallet;
 import com.fintech.dbilleteras_virtuales.repository.UserRepository;
+import com.fintech.dbilleteras_virtuales.repository.WalletRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,6 +30,8 @@ public class AuthService {
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final NotificationService notificationService;
+    private final WalletRepository walletRepository;
+    private final WalletService walletService;
 
     public AuthResponse register(RegisterRequest request) {
         logger.info("📝 Intentando registrar usuario: {}", request.getEmail());
@@ -55,6 +61,18 @@ public class AuthService {
         // Guardar usuario en la base de datos
         User savedUser = userRepository.save(user);
         logger.info("✅ Usuario guardado en BD: {} con ID: {}", savedUser.getEmail(), savedUser.getId());
+
+        Wallet defaultWallet = Wallet.builder()
+            .userId(savedUser.getId())
+            .name("Mi billetera")
+            .type("DAILY")
+            .balance(0)
+            .isActive(true)
+            .createdAt(LocalDate.now())
+            .transferKey(walletService.generateTransferKey("Mi billetera", savedUser.getDocumentNumber()))
+            .build();
+            
+        walletRepository.save(defaultWallet);
 
         // Intentar enviar email de verificación
         try {
