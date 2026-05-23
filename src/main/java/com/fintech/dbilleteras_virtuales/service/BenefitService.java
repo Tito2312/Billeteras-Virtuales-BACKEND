@@ -8,11 +8,9 @@ import org.springframework.stereotype.Service;
 import com.fintech.dbilleteras_virtuales.model.Benefit;
 import com.fintech.dbilleteras_virtuales.model.RedeemedBenefit;
 import com.fintech.dbilleteras_virtuales.model.User;
-import com.fintech.dbilleteras_virtuales.model.Wallet;
 import com.fintech.dbilleteras_virtuales.repository.BenefitRepository;
 import com.fintech.dbilleteras_virtuales.repository.RedeemedBenefitRepository;
 import com.fintech.dbilleteras_virtuales.repository.UserRepository;
-import com.fintech.dbilleteras_virtuales.repository.WalletRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,7 +21,6 @@ public class BenefitService {
     private final BenefitRepository benefitRepository;
     private final RedeemedBenefitRepository redeemedBenefitRepository;
     private final UserRepository userRepository;
-    private final WalletRepository walletRepository;
     private final NotificationService notificationService;
 
     public List<Benefit> getAvailableBenefits() {
@@ -34,11 +31,7 @@ public class BenefitService {
         return redeemedBenefitRepository.findByUserId(userId);
     }
 
-    public List<RedeemedBenefit> getAllRedeemed() {
-        return redeemedBenefitRepository.findAll();
-    }
-
-    public RedeemedBenefit redeem(String userId, String benefitId, String walletId) {
+    public RedeemedBenefit redeem(String userId, String benefitId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
@@ -50,28 +43,12 @@ public class BenefitService {
         }
 
         if (user.getPoints() < benefit.getPointsCost()) {
-            throw new RuntimeException("Puntos insuficientes. Necesitas " 
-                + benefit.getPointsCost() + " puntos y tienes " + user.getPoints());
+            throw new RuntimeException("Puntos insuficientes. Necesitas "
+                    + benefit.getPointsCost() + " puntos y tienes " + user.getPoints());
         }
 
         user.setPoints(user.getPoints() - benefit.getPointsCost());
         userRepository.save(user);
-
-        // Acreditar dinero a la billetera elegida (o la primera activa si no se especificó)
-        if (benefit.getMoneyValue() > 0) {
-            Wallet target = null;
-            if (walletId != null && !walletId.isEmpty()) {
-                target = walletRepository.findById(walletId).orElse(null);
-            }
-            if (target == null) {
-                target = walletRepository.findAllByUserId(userId).stream()
-                    .filter(Wallet::isActive).findFirst().orElse(null);
-            }
-            if (target != null) {
-                target.setBalance(target.getBalance() + benefit.getMoneyValue());
-                walletRepository.save(target);
-            }
-        }
 
         RedeemedBenefit redeemed = RedeemedBenefit.builder()
                 .userId(userId)
@@ -83,8 +60,6 @@ public class BenefitService {
                 .build();
 
         RedeemedBenefit saved = redeemedBenefitRepository.save(redeemed);
-
-        notificationService.notificationTransaction(user.getEmail(), "BENEFICIO CANJEADO", benefit.getMoneyValue());
 
         return saved;
     }

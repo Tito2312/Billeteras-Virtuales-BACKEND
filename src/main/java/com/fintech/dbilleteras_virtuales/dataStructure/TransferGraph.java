@@ -60,6 +60,15 @@ public class TransferGraph {
     }
 
     public List<String> findPath(String sourceUserId, String targetUserId) {
+        // Build undirected view: both sent and received edges count as connections
+        Map<String, List<String>> undirected = new HashMap<>();
+        for (Map.Entry<String, List<GraphEdge>> entry : adjacencyList.entrySet()) {
+            String from = entry.getKey();
+            for (GraphEdge edge : entry.getValue()) {
+                undirected.computeIfAbsent(from, k -> new ArrayList<>()).add(edge.targetUserId);
+                undirected.computeIfAbsent(edge.targetUserId, k -> new ArrayList<>()).add(from);
+            }
+        }
 
         Map<String, String> parent = new HashMap<>();
         Queue<String> queue = new Queue<>();
@@ -69,21 +78,17 @@ public class TransferGraph {
         visited.add(sourceUserId);
 
         while (!queue.isEmpty()) {
-
             String current = queue.dequeue();
 
             if (current.equals(targetUserId)) {
                 return buildPath(parent, sourceUserId, targetUserId);
             }
 
-            for (GraphEdge edge : adjacencyList.getOrDefault(current, new ArrayList<>())) {
-
-                if (!visited.contains(edge.targetUserId)) {
-
-                    visited.add(edge.targetUserId);
-                    parent.put(edge.targetUserId, current);
-
-                    queue.enqueue(edge.targetUserId);
+            for (String neighbor : undirected.getOrDefault(current, new ArrayList<>())) {
+                if (!visited.contains(neighbor)) {
+                    visited.add(neighbor);
+                    parent.put(neighbor, current);
+                    queue.enqueue(neighbor);
                 }
             }
         }

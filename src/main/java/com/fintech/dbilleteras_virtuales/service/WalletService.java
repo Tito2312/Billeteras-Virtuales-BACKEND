@@ -32,7 +32,7 @@ public class WalletService {
 
         String transferKey = generateTransferKey(request.getName(), user.getDocumentNumber());
         
-        if (!walletRepository.findByTransferKey(transferKey).isPresent()) {
+        if (walletRepository.findByTransferKey(transferKey).isPresent()) {
             throw new RuntimeException("Ya existe una billetera con esta llave");
         }
 
