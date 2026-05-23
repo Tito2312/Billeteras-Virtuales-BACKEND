@@ -31,11 +31,18 @@ public class BenefitController {
         return ResponseEntity.ok(benefitService.getRedeemedByUser(userId));
     }
 
+    // Listar todos los canjes — admin
+    @GetMapping("/redeemed")
+    public ResponseEntity<List<RedeemedBenefit>> getAllRedeemed() {
+        return ResponseEntity.ok(benefitService.getAllRedeemed());
+    }
+
     // Canjear un beneficio
     @PostMapping("/redeem")
     public ResponseEntity<RedeemedBenefit> redeem(@RequestParam String userId,
-                                                   @RequestParam String benefitId) {
-        return ResponseEntity.ok(benefitService.redeem(userId, benefitId));
+                                                   @RequestParam String benefitId,
+                                                   @RequestParam(required = false) String walletId) {
+        return ResponseEntity.ok(benefitService.redeem(userId, benefitId, walletId));
     }
 
     // Marcar beneficio como usado

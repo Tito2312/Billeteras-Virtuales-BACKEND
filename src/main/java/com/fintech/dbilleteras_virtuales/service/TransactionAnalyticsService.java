@@ -51,6 +51,9 @@ public class TransactionAnalyticsService {
     }
 
     public void anomalyDetection(String userId, double amount, String walletId) {
+        List<Transaction> history = historyTransactions(userId);
+        if (history.size() < 5) return;
+
         var user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
@@ -98,6 +101,7 @@ public class TransactionAnalyticsService {
                             actual.getId(),
                             "ALTO",
                             "Transferencias  menos de 5 minutos");
+                    return;
                 }
             } else {
                 count = 0;
@@ -143,6 +147,7 @@ public class TransactionAnalyticsService {
                             actual.getId(),
                             "MEDIO",
                             "Transferencias repetitivas hacia el mismo destino en menos de 5 minutos");
+                    return;
                 }
             } else {
                 count = 0;
@@ -186,7 +191,7 @@ public class TransactionAnalyticsService {
                             firsNodo.getNodeValue().getId(),
                             "BAJO",
                             "Actividad nocturna inusual detectada");
-
+                    return;
                 }
 
             } else {

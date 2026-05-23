@@ -15,7 +15,7 @@ import lombok.AllArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Transaction {
+public class Transaction implements Comparable<Transaction> {
 
     @Id
     private String id;
@@ -31,5 +31,11 @@ public class Transaction {
     private int points;
     private boolean reversed;
     private LocalDateTime createdAt;
+    private LocalDateTime reversedAt;
 
+    // Orden descendente por monto para PriorityQueue (mayor monto = mayor prioridad)
+    @Override
+    public int compareTo(Transaction other) {
+        return Double.compare(other.amount, this.amount);
+    }
 }

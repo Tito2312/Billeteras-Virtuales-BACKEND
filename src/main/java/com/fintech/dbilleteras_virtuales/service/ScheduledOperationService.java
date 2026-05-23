@@ -61,7 +61,11 @@ public class ScheduledOperationService {
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        return scheduledOperationRepository.save(operation);
+        ScheduledOperation saved = scheduledOperationRepository.save(operation);
+
+        notificationService.notificationTransactionProgramadaCreada(user.getEmail());
+
+        return saved;
     }
 
     public ScheduledOperation markAsFailed(String operationId, String errorMessage) {
@@ -137,7 +141,9 @@ public class ScheduledOperationService {
             operation.setExecuted(true);
             operation.setStatus(ScheduledOperationStatus.EXECUTED);
             System.out.println("✅ Operación ejecutada exitosamente: " + operation.getId());
-            
+
+            notificationService.notificationTransactionProgramada(user.getEmail());
+
             return scheduledOperationRepository.save(operation);
             
         } catch (Exception e) {

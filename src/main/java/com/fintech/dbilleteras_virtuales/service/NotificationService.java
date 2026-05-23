@@ -35,7 +35,7 @@ public class NotificationService {
             correo.setTo(addressee);
             correo.setSubject(subject);
             correo.setText(message);
-            correo.setFrom("walletteachdata@gmail.com"); // Remitente explícito
+            correo.setFrom("walletteachdata@gmail.com");
 
             mailSender.send(correo);
             logger.info("✅ Email enviado exitosamente a: {}", addressee);
@@ -50,8 +50,12 @@ public class NotificationService {
 
         } catch (Exception e) {
             logger.error("❌ Error al enviar email a {}: {}", addressee, e.getMessage());
-            logger.error("❌ Detalle del error: ", e);
-            throw new RuntimeException("Error al enviar email: " + e.getMessage(), e);
+            Notification notification = Notification.builder()
+                    .asunto(subject)
+                    .message(message)
+                    .email(addressee)
+                    .build();
+            return notificationRepository.save(notification);
         }
     }
 
@@ -105,6 +109,18 @@ public class NotificationService {
                 "Saludos,\nEquipo de FinWallet";
 
         logger.info("📧 Enviando email de verificación a: {} con token: {}", email, token);
+        return sendEmail(message, subject, email);
+    }
+
+    public Notification notificationTransactionProgramadaCreada(String email) {
+        String subject = "✅ Operación programada registrada";
+        String message = "Hola,\n\nTu operación programada fue registrada exitosamente.\n\nSe ejecutará automáticamente en la fecha y hora indicada.\n\nSaludos,\nEquipo de FinWallet";
+        return sendEmail(message, subject, email);
+    }
+
+    public Notification notificationTransactionProgramada(String email) {
+        String subject = "✅ Operación programada ejecutada";
+        String message = "Hola,\n\nTu operación programada fue ejecutada exitosamente.\n\nPuedes verificar el detalle en tu historial de transacciones.\n\nSaludos,\nEquipo de FinWallet";
         return sendEmail(message, subject, email);
     }
 

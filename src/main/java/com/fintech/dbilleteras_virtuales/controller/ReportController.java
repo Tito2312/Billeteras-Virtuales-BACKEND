@@ -26,8 +26,10 @@ public class ReportController {
 
     @GetMapping("/users/most-transfers")
     public ResponseEntity<List<ReportDto.UserTransferReport>> getUsersWithMostTransfers(
-            @RequestParam(defaultValue = "5") int top) {
-        return ResponseEntity.ok(reportService.getUsersWithMostTransfers(top));
+            @RequestParam(defaultValue = "5") int top,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
+        return ResponseEntity.ok(reportService.getUsersWithMostTransfers(top, start, end));
     }
 
     @GetMapping("/wallets/categories")
