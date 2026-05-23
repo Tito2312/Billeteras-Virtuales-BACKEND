@@ -66,6 +66,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PATCH, "/api/benefits/use/**").authenticated()
                 .requestMatchers(HttpMethod.POST, "/api/benefits").hasRole("ADMIN")
                 .requestMatchers("/api/benefits/toggle/**").hasRole("ADMIN")
+                .requestMatchers("/api/auth/forgot-password").permitAll()
+                .requestMatchers("/api/auth/reset-password").permitAll()
                 .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
