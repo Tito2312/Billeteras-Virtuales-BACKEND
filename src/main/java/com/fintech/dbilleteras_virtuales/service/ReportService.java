@@ -2,6 +2,7 @@ package com.fintech.dbilleteras_virtuales.service;
 
 import com.fintech.dbilleteras_virtuales.dataStructure.LinkedList;
 import com.fintech.dbilleteras_virtuales.dataStructure.ListNode;
+import com.fintech.dbilleteras_virtuales.dataStructure.PriorityQueue;
 import com.fintech.dbilleteras_virtuales.dto.ReportDto;
 import com.fintech.dbilleteras_virtuales.model.Transaction;
 import com.fintech.dbilleteras_virtuales.model.TransactionType;
@@ -118,8 +119,10 @@ public class ReportService {
         return result;
     }
 
-    public List<ReportDto.UserTransferReport> getUsersWithMostTransfers(int topN) {
-        List<Transaction> transfers = transactionRepository.findByType(TransactionType.TRANSFER);
+    public List<ReportDto.UserTransferReport> getUsersWithMostTransfers(int topN, LocalDateTime start, LocalDateTime end) {
+        List<Transaction> transfers = (start != null && end != null)
+                ? transactionRepository.findByTypeAndCreatedAtBetween(TransactionType.TRANSFER, start, end)
+                : transactionRepository.findByType(TransactionType.TRANSFER);
 
         LinkedList<Transaction> txList = new LinkedList<>();
         for (Transaction t : transfers)
@@ -279,32 +282,16 @@ public class ReportService {
     public List<Transaction> getTopTransactionsByAmount(int topN) {
         List<Transaction> all = transactionRepository.findAll();
 
-        LinkedList<Transaction> txList = new LinkedList<>();
-        for (Transaction t : all)
-            txList.add(t);
-
-        boolean swapped;
-        do {
-            swapped = false;
-            ListNode<Transaction> node = txList.firstNode();
-            while (node != null && node.getNextNode() != null) {
-                Transaction current = node.getNodeValue();
-                Transaction next = node.getNextNode().getNodeValue();
-                if (current.getAmount() < next.getAmount()) {
-                    node.setNodeValue(next);
-                    node.getNextNode().setNodeValue(current);
-                    swapped = true;
-                }
-                node = node.getNextNode();
-            }
-        } while (swapped);
+        // PriorityQueue propia ordenada descendente por monto (via Comparable)
+        PriorityQueue<Transaction> pq = new PriorityQueue<>();
+        for (Transaction t : all) {
+            pq.enqueue(t);
+        }
 
         List<Transaction> result = new ArrayList<>();
-        ListNode<Transaction> node = txList.firstNode();
         int i = 0;
-        while (node != null && i < topN) {
-            result.add(node.getNodeValue());
-            node = node.getNextNode();
+        while (!pq.isEmpty() && i < topN) {
+            result.add(pq.dequeue());
             i++;
         }
         return result;

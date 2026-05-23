@@ -59,7 +59,12 @@ public class SecurityConfig {
                 .requestMatchers("/api/hashtable/**").hasRole("ADMIN")
                 .requestMatchers("/api/tree/**").hasRole("ADMIN")
                 .requestMatchers("/api/reports/**").hasRole("ADMIN")
-                .requestMatchers("/api/benefits").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/benefits").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/benefits/redeemed/**").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/benefits/redeemed").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/benefits/redeem").authenticated()
+                .requestMatchers(HttpMethod.PATCH, "/api/benefits/use/**").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/benefits").hasRole("ADMIN")
                 .requestMatchers("/api/benefits/toggle/**").hasRole("ADMIN")
                 .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
