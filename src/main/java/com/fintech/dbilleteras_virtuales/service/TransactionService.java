@@ -52,7 +52,7 @@ public class TransactionService {
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         List<Transaction> listTransactionsToday = transactionRepository
-                .findBySourceWalletAndCreatedAtBetweenOrderByCreatedAtAsc(userId, startDay, finalDay);
+                .findByUserIdAndCreatedAtBetween(userId, startDay, finalDay);
 
         int size = listTransactionsToday.size();
 
@@ -358,6 +358,7 @@ public class TransactionService {
 
         transaction.setReversed(true);
         transaction.setStatus(TransactionStatus.REVERSED);
+        transaction.setReversedAt(LocalDateTime.now());
 
         rewardService.updateUserPoints(transaction.getUserId(), -transaction.getPoints());
 

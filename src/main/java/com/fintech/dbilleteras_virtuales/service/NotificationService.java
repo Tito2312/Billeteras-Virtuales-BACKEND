@@ -35,7 +35,7 @@ public class NotificationService {
             correo.setTo(addressee);
             correo.setSubject(subject);
             correo.setText(message);
-            correo.setFrom("walletteachdata@gmail.com"); // Remitente explícito
+            correo.setFrom("walletteachdata@gmail.com");
 
             mailSender.send(correo);
             logger.info("✅ Email enviado exitosamente a: {}", addressee);
@@ -50,8 +50,12 @@ public class NotificationService {
 
         } catch (Exception e) {
             logger.error("❌ Error al enviar email a {}: {}", addressee, e.getMessage());
-            logger.error("❌ Detalle del error: ", e);
-            throw new RuntimeException("Error al enviar email: " + e.getMessage(), e);
+            Notification notification = Notification.builder()
+                    .asunto(subject)
+                    .message(message)
+                    .email(addressee)
+                    .build();
+            return notificationRepository.save(notification);
         }
     }
 
@@ -108,6 +112,18 @@ public class NotificationService {
         return sendEmail(message, subject, email);
     }
 
+    public Notification notificationTransactionProgramadaCreada(String email) {
+        String subject = "✅ Operación programada registrada";
+        String message = "Hola,\n\nTu operación programada fue registrada exitosamente.\n\nSe ejecutará automáticamente en la fecha y hora indicada.\n\nSaludos,\nEquipo de FinWallet";
+        return sendEmail(message, subject, email);
+    }
+
+    public Notification notificationTransactionProgramada(String email) {
+        String subject = "✅ Operación programada ejecutada";
+        String message = "Hola,\n\nTu operación programada fue ejecutada exitosamente.\n\nPuedes verificar el detalle en tu historial de transacciones.\n\nSaludos,\nEquipo de FinWallet";
+        return sendEmail(message, subject, email);
+    }
+
     public Notification anomalyDetection(String email) {
         String subject = "🔄 TRANSACCIÓN SOSPECHOSA";
         String message = "Hola,\n\nHicieste una Transaccion sospechosa, su monto fue mayor al promedio de las otras ";
@@ -137,6 +153,19 @@ public class NotificationService {
         String message = "Hola,\n\nHemos detectado varias transacciones realizadas en horario nocturno, lo cual es inusual en tu historial.\n\nSi no reconoces estas operaciones, contacta a soporte de inmediato.\n\nSaludos,\nEquipo de Billeteras Virtuales";
         return sendEmail(message, subject, email);
     }
+
+public Notification sendResetPasswordEmail(String email, String token) {
+    String link = "http://localhost:3000/reset-password?token=" + token;
+    String subject = "🔐 Recupera tu contraseña - FinWallet";
+    String message = "Hola,\n\n" +
+            "Hemos recibido una solicitud para restablecer tu contraseña.\n\n" +
+            "Para crear una nueva contraseña, haz clic en el siguiente enlace:\n\n" +
+            link + "\n\n" +
+            "Este enlace es válido por 1 hora.\n\n" +
+            "Si no solicitaste esto, ignora este mensaje.\n\n" +
+            "Saludos,\nEquipo de FinWallet";
+    return sendEmail(message, subject, email);
+}
 
     public Queue<Notification> notificationQueue(String userId) {
 
