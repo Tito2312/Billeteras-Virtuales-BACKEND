@@ -119,7 +119,8 @@ public class ReportService {
         return result;
     }
 
-    public List<ReportDto.UserTransferReport> getUsersWithMostTransfers(int topN, LocalDateTime start, LocalDateTime end) {
+    public List<ReportDto.UserTransferReport> getUsersWithMostTransfers(int topN, LocalDateTime start,
+            LocalDateTime end) {
         List<Transaction> transfers = (start != null && end != null)
                 ? transactionRepository.findByTypeAndCreatedAtBetween(TransactionType.TRANSFER, start, end)
                 : transactionRepository.findByType(TransactionType.TRANSFER);
@@ -282,7 +283,6 @@ public class ReportService {
     public List<Transaction> getTopTransactionsByAmount(int topN) {
         List<Transaction> all = transactionRepository.findAll();
 
-        // PriorityQueue propia ordenada descendente por monto (via Comparable)
         PriorityQueue<Transaction> pq = new PriorityQueue<>();
         for (Transaction t : all) {
             pq.enqueue(t);
