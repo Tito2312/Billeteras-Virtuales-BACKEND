@@ -24,7 +24,7 @@ public class WalletService {
 
     public Wallet createWallet(WalletRequest request) {
         User user = userRepository.findById(request.getUserId())
-            .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (!userRepository.existsById(request.getUserId())) {
             throw new IllegalArgumentException("Usuario no encontrado");
@@ -85,7 +85,7 @@ public class WalletService {
 
         if (balance < 100.0) {
             var user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+                    .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
             notificationService.notificationLowBalance(user.getEmail(), wallet.getName(), balance);
         }
 
@@ -131,13 +131,28 @@ public class WalletService {
     }
 
     public Wallet findByTransferKey(String transferKey) {
-    return walletRepository.findByTransferKey(transferKey)
-        .orElseThrow(() -> new RuntimeException("Billetera no encontrada con esa clave: " + transferKey));
-}
-
+        return walletRepository.findByTransferKey(transferKey)
+                .orElseThrow(() -> new RuntimeException("Billetera no encontrada con esa clave: " + transferKey));
+    }
 
     private String generateTransferKey(String walletName, String documentNumber) {
         String cleanName = walletName.trim().toLowerCase().replace(" ", "");
         return cleanName + documentNumber;
+    }
+
+    public String deletWallet(String userId, String walletId) {
+        Wallet wallet = walletRepository.findById(walletId)
+                .orElseThrow(() -> new RuntimeException("Billetera no encontrada"));
+
+        if (!wallet.getUserId().equals(userId)) {
+            throw new IllegalArgumentException("No tienes permiso para eliminar esta billetera");
+        }
+
+        if (wallet.getBalance() > 0) {
+            throw new IllegalArgumentException("No puedes eliminar una billetera con saldo. Retira el dinero primero.");
+        }
+
+        walletRepository.deleteById(walletId);
+        return "Billetera eliminada exitosamente";
     }
 }

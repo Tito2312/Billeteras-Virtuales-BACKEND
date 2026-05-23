@@ -65,8 +65,18 @@ public class WalletController {
     }
 
     @GetMapping("/by-transfer-key")
-public ResponseEntity<Wallet> findByTransferKey(@RequestParam String transferKey) {
-    return ResponseEntity.ok(walletService.findByTransferKey(transferKey));
-}
+    public ResponseEntity<Wallet> findByTransferKey(@RequestParam String transferKey) {
+        return ResponseEntity.ok(walletService.findByTransferKey(transferKey));
+    }
+
+    @GetMapping("/deleteWallet")
+    public ResponseEntity<String> deletWallet(@RequestParam String walletId, @RequestParam String userId) {
+        try {
+            walletService.deletWallet(userId, walletId);
+            return ResponseEntity.ok("Billetera eliminada");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 
 }

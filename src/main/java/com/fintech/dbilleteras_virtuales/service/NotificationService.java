@@ -92,20 +92,6 @@ public class NotificationService {
         return sendEmail(message, subject, email);
     }
 
-    public Notification TransferNotification(String emailUser1, String name1, String emailUser2, String name2,
-            double amount) {
-        String subject1 = "✅ TRANSFERENCIA EXITOSA";
-        String message1 = "Hola " + name1 + ",\n\nHas transferido $" + String.format("%.2f", amount) + " a " + name2
-                + " exitosamente.\n\nSaludos,\nEquipo de Billeteras Virtuales";
-
-        String subject2 = "💰 HAS RECIBIDO UNA TRANSFERENCIA";
-        String message2 = "Hola " + name2 + ",\n\nHas recibido $" + String.format("%.2f", amount) + " de " + name1
-                + ".\n\nSaludos,\nEquipo de Billeteras Virtuales";
-
-        sendEmail(message2, subject2, emailUser2);
-        return sendEmail(message1, subject1, emailUser1);
-    }
-
     public Notification sendVerificationEmail(String email, String token) {
         String link = "http://localhost:3000/verify-email?token=" + token;
 

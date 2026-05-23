@@ -60,7 +60,7 @@ public class TransactionAnalyticsService {
                     userId,
                     user.getId(),
                     "ALTO",
-                    "Transferecnia con un valor mas alto al inusual");
+                    "Transferencia con un valor mas alto al inusual");
         }
     }
 
