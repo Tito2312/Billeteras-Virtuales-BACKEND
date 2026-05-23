@@ -59,7 +59,7 @@ public class TransactionController {
     }
 
     @PostMapping("historyTransactions")
-    public ResponseEntity<List<Transaction>> historyTransactions(@RequestBody String userId) {
+    public ResponseEntity<List<Transaction>> historyTransactions(@RequestParam String userId) {
 
         return ResponseEntity.ok(transactionService.ListTransactions(userId));
     }
