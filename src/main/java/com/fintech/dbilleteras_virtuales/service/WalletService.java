@@ -31,6 +31,10 @@ public class WalletService {
         }
 
         String transferKey = generateTransferKey(request.getName(), user.getDocumentNumber());
+        
+        if (!walletRepository.findByTransferKey(transferKey).isPresent()) {
+            throw new RuntimeException("Ya existe una billetera con esta llave");
+        }
 
         Wallet wallet = Wallet.builder()
                 .userId(request.getUserId())
@@ -62,8 +66,20 @@ public class WalletService {
 
     public Wallet update(String id, String userId, WalletRequest request) {
         Wallet wallet = findById(id, userId);
+
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException());
+
+        String newTransferKey = generateTransferKey(request.getName(), user.getDocumentNumber());
+        
+        Optional<Wallet> existingWallet = walletRepository.findByTransferKey(newTransferKey);
+        if (existingWallet.isPresent() && !existingWallet.get().getId().equals(id)) {
+            throw new RuntimeException("Ya existe una billetera con este nombre");
+        } 
+
         wallet.setName(request.getName());
         wallet.setType(request.getType());
+        wallet.setTransferKey(newTransferKey);
         return walletRepository.save(wallet);
     }
 
@@ -135,7 +151,7 @@ public class WalletService {
                 .orElseThrow(() -> new RuntimeException("Billetera no encontrada con esa clave: " + transferKey));
     }
 
-    private String generateTransferKey(String walletName, String documentNumber) {
+    public String generateTransferKey(String walletName, String documentNumber) {
         String cleanName = walletName.trim().toLowerCase().replace(" ", "");
         return cleanName + documentNumber;
     }
