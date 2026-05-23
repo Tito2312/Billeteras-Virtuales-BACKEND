@@ -137,4 +137,47 @@ public class AuthService {
 
         logger.info("✅ Cuenta verificada exitosamente: {}", user.getEmail());
     }
+
+
+public void forgotPassword(String email) {
+    User user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new RuntimeException("No existe un usuario con ese correo electrónico"));
+    
+    String token = UUID.randomUUID().toString();
+    user.setResetPasswordToken(token);
+    user.setResetPasswordExpiry(LocalDateTime.now().plusHours(1));
+    userRepository.save(user);
+    
+    notificationService.sendResetPasswordEmail(user.getEmail(), token);
+}
+
+public void resetPassword(String token, String newPassword) {
+    User user = userRepository.findByResetPasswordToken(token)
+        .orElseThrow(() -> new RuntimeException("Token inválido o expirado"));
+    
+    if (user.getResetPasswordExpiry().isBefore(LocalDateTime.now())) {
+        throw new RuntimeException("El enlace ha expirado. Solicita un nuevo restablecimiento.");
+    }
+    
+    user.setPassword(passwordEncoder.encode(newPassword));
+    user.setResetPasswordToken(null);
+    user.setResetPasswordExpiry(null);
+    userRepository.save(user);
+}
+
+public void changePassword(String userId, String currentPassword, String newPassword, String confirmPassword) {
+    if (!newPassword.equals(confirmPassword)) {
+        throw new RuntimeException("Las contraseñas nuevas no coinciden");
+    }
+    
+    User user = userRepository.findById(userId)
+        .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+    
+    if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+        throw new RuntimeException("Contraseña actual incorrecta");
+    }
+    
+    user.setPassword(passwordEncoder.encode(newPassword));
+    userRepository.save(user);
+}
 }

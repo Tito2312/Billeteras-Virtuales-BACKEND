@@ -2,6 +2,7 @@ package com.fintech.dbilleteras_virtuales.repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
@@ -25,4 +26,6 @@ public interface ScheduledOperationRepository extends MongoRepository<ScheduledO
     
     @Query("{ 'status': 'PENDING', 'scheduledDate': { $lte: ?0 } }")
     List<ScheduledOperation> findPendingOperationsToExecute(LocalDateTime now);
+
+    Optional<ScheduledOperation> findByIdAndUserId(String id, String userId);
 }

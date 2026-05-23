@@ -1,6 +1,7 @@
 package com.fintech.dbilleteras_virtuales.model;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -43,6 +44,8 @@ public class User implements UserDetails {
     private boolean isActive = false;
     private String verificationToken;
     private Role role = Role.ROLE_USER;
+    private String resetPasswordToken;
+    private LocalDateTime resetPasswordExpiry;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

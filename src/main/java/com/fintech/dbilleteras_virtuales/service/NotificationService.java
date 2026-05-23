@@ -154,6 +154,19 @@ public class NotificationService {
         return sendEmail(message, subject, email);
     }
 
+public Notification sendResetPasswordEmail(String email, String token) {
+    String link = "http://localhost:3000/reset-password?token=" + token;
+    String subject = "🔐 Recupera tu contraseña - FinWallet";
+    String message = "Hola,\n\n" +
+            "Hemos recibido una solicitud para restablecer tu contraseña.\n\n" +
+            "Para crear una nueva contraseña, haz clic en el siguiente enlace:\n\n" +
+            link + "\n\n" +
+            "Este enlace es válido por 1 hora.\n\n" +
+            "Si no solicitaste esto, ignora este mensaje.\n\n" +
+            "Saludos,\nEquipo de FinWallet";
+    return sendEmail(message, subject, email);
+}
+
     public Queue<Notification> notificationQueue(String userId) {
 
         User user = userRepository.findById(userId)
