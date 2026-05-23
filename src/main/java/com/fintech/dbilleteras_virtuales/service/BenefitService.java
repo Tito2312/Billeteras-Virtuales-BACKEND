@@ -21,7 +21,6 @@ public class BenefitService {
     private final BenefitRepository benefitRepository;
     private final RedeemedBenefitRepository redeemedBenefitRepository;
     private final UserRepository userRepository;
-    private final NotificationService notificationService;
 
     public List<Benefit> getAvailableBenefits() {
         return benefitRepository.findByActiveTrue();
