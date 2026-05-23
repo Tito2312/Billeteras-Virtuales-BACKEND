@@ -10,7 +10,9 @@ import org.springframework.stereotype.Service;
 import com.fintech.dbilleteras_virtuales.dataStructure.Queue;
 
 import com.fintech.dbilleteras_virtuales.model.Notification;
+import com.fintech.dbilleteras_virtuales.model.User;
 import com.fintech.dbilleteras_virtuales.repository.NotificationRepository;
+import com.fintech.dbilleteras_virtuales.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -22,6 +24,7 @@ public class NotificationService {
 
     private final JavaMailSender mailSender;
     private final NotificationRepository notificationRepository;
+    private final UserRepository userRepository;
 
     public Notification sendEmail(String message, String subject, String addressee) {
         logger.info("📧 Intentando enviar email a: {}", addressee);
@@ -151,14 +154,15 @@ public class NotificationService {
 
     public Queue<Notification> notificationQueue(String userId) {
 
-        List<Notification> notifications = notificationRepository.findByUserId(userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        List<Notification> notifications = notificationRepository.findByEmail(user.getEmail());
 
         Queue<Notification> notificationsQueue = new Queue<Notification>();
 
         for (Notification t : notifications) {
-
             notificationsQueue.enqueue(t);
-
         }
 
         return notificationsQueue;

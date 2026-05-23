@@ -29,7 +29,7 @@ public class chatGptController {
                 - Subir de nivel según puntos: Bronce (0-500), Plata (501-1000), Oro (1001-5000), Platino (5000+)
                 - Revertir transacciones
                 - Recibir alertas de seguridad por actividad inusual
-                Responde siempre en español y enfocado en esta plataforma. Pregunta del usuario:\s
+                Responde siempre en español y enfocado en esta plataforma y ten en cuenta esto " SE MAS BREVE Y DIRECTO AL DAR LAS RESPUESTAS AL USUARIO, NO DES TANTA INFORMACION IRRELEVANTE". Pregunta del usuario:\s
                 """;
         return chatModel.call(contexto + mensaje);
     }
