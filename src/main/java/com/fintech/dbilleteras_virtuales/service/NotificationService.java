@@ -5,7 +5,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import com.fintech.dbilleteras_virtuales.dataStructure.Queue;
 
@@ -26,41 +25,28 @@ public class NotificationService {
 
     private static final Logger logger = LoggerFactory.getLogger(NotificationService.class);
 
-    private final JavaMailSender mailSender;
+    private final AsyncEmailService asyncEmailService;
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
 
     public Notification sendEmail(String message, String subject, String addressee) {
-        logger.info("📧 Intentando enviar email a: {}", addressee);
-        logger.info("📧 Asunto: {}", subject);
+        logger.info("📧 Encolando email asíncrono a: {}", addressee);
 
-        try {
-            SimpleMailMessage correo = new SimpleMailMessage();
-            correo.setTo(addressee);
-            correo.setSubject(subject);
-            correo.setText(message);
-            correo.setFrom("walletteachdata@gmail.com");
+        SimpleMailMessage correo = new SimpleMailMessage();
+        correo.setTo(addressee);
+        correo.setSubject(subject);
+        correo.setText(message);
+        correo.setFrom("walletteachdata@gmail.com");
 
-            mailSender.send(correo);
-            logger.info("✅ Email enviado exitosamente a: {}", addressee);
+        asyncEmailService.send(correo);
 
-            Notification notification = Notification.builder()
-                    .asunto(subject)
-                    .message(message)
-                    .email(addressee)
-                    .build();
+        Notification notification = Notification.builder()
+                .asunto(subject)
+                .message(message)
+                .email(addressee)
+                .build();
 
-            return notificationRepository.save(notification);
-
-        } catch (Exception e) {
-            logger.error("❌ Error al enviar email a {}: {}", addressee, e.getMessage());
-            Notification notification = Notification.builder()
-                    .asunto(subject)
-                    .message(message)
-                    .email(addressee)
-                    .build();
-            return notificationRepository.save(notification);
-        }
+        return notificationRepository.save(notification);
     }
 
     public Notification notificationLowBalance(String email, String nombreBilletera, double saldo) {
@@ -158,18 +144,18 @@ public class NotificationService {
         return sendEmail(message, subject, email);
     }
 
-public Notification sendResetPasswordEmail(String email, String token) {
-    String link = frontendUrl + "/reset-password?token=" + token;
-    String subject = "🔐 Recupera tu contraseña - FinWallet";
-    String message = "Hola,\n\n" +
-            "Hemos recibido una solicitud para restablecer tu contraseña.\n\n" +
-            "Para crear una nueva contraseña, haz clic en el siguiente enlace:\n\n" +
-            link + "\n\n" +
-            "Este enlace es válido por 1 hora.\n\n" +
-            "Si no solicitaste esto, ignora este mensaje.\n\n" +
-            "Saludos,\nEquipo de FinWallet";
-    return sendEmail(message, subject, email);
-}
+    public Notification sendResetPasswordEmail(String email, String token) {
+        String link = frontendUrl + "/reset-password?token=" + token;
+        String subject = "🔐 Recupera tu contraseña - FinWallet";
+        String message = "Hola,\n\n" +
+                "Hemos recibido una solicitud para restablecer tu contraseña.\n\n" +
+                "Para crear una nueva contraseña, haz clic en el siguiente enlace:\n\n" +
+                link + "\n\n" +
+                "Este enlace es válido por 1 hora.\n\n" +
+                "Si no solicitaste esto, ignora este mensaje.\n\n" +
+                "Saludos,\nEquipo de FinWallet";
+        return sendEmail(message, subject, email);
+    }
 
     public Queue<Notification> notificationQueue(String userId) {
 
