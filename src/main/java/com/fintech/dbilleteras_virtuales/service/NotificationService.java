@@ -1,0 +1,190 @@
+package com.fintech.dbilleteras_virtuales.service;
+
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.stereotype.Service;
+import com.fintech.dbilleteras_virtuales.dataStructure.Queue;
+
+import com.fintech.dbilleteras_virtuales.model.Notification;
+import com.fintech.dbilleteras_virtuales.model.User;
+import com.fintech.dbilleteras_virtuales.repository.NotificationRepository;
+import com.fintech.dbilleteras_virtuales.repository.UserRepository;
+
+import lombok.RequiredArgsConstructor;
+
+@Service
+@RequiredArgsConstructor
+public class NotificationService {
+
+    private static final Logger logger = LoggerFactory.getLogger(NotificationService.class);
+
+    private final JavaMailSender mailSender;
+    private final NotificationRepository notificationRepository;
+    private final UserRepository userRepository;
+
+    public Notification sendEmail(String message, String subject, String addressee) {
+        logger.info("📧 Intentando enviar email a: {}", addressee);
+        logger.info("📧 Asunto: {}", subject);
+
+        try {
+            SimpleMailMessage correo = new SimpleMailMessage();
+            correo.setTo(addressee);
+            correo.setSubject(subject);
+            correo.setText(message);
+            correo.setFrom("walletteachdata@gmail.com");
+
+            mailSender.send(correo);
+            logger.info("✅ Email enviado exitosamente a: {}", addressee);
+
+            Notification notification = Notification.builder()
+                    .asunto(subject)
+                    .message(message)
+                    .email(addressee)
+                    .build();
+
+            return notificationRepository.save(notification);
+
+        } catch (Exception e) {
+            logger.error("❌ Error al enviar email a {}: {}", addressee, e.getMessage());
+            Notification notification = Notification.builder()
+                    .asunto(subject)
+                    .message(message)
+                    .email(addressee)
+                    .build();
+            return notificationRepository.save(notification);
+        }
+    }
+
+    public Notification notificationLowBalance(String email, String nombreBilletera, double saldo) {
+        String subject = "⚠️ Alerta: Saldo bajo en tu billetera";
+        String message = "Hola,\n\nTu billetera \"" + nombreBilletera + "\" tiene un saldo actual de $"
+                + String.format("%.2f", saldo)
+                + ".\n\nTe recomendamos recargar saldo para evitar inconvenientes con tus transacciones.\n\nSaludos,\nEquipo de Billeteras Virtuales";
+        return sendEmail(message, subject, email);
+    }
+
+    public Notification notificationTransaction(String email, String tipo, double saldo) {
+        String subject = "✅ Confirmación: " + tipo + " exitosa";
+        String message = "Hola,\n\nTu " + tipo.toLowerCase() + " por un monto de $" + String.format("%.2f", saldo)
+                + " ha sido procesada exitosamente.\n\nPuedes verificar el detalle de esta transacción en tu historial.\n\nSaludos,\nEquipo de Billeteras Virtuales";
+        return sendEmail(message, subject, email);
+    }
+
+    public Notification rejetedTransaction(String email, String type) {
+        String subject = "❌ Transacción rechazada";
+        String message = "Hola,\n\nLamentamos informarte que tu " + type.toLowerCase()
+                + " ha sido rechazada.\n\nPor favor verifica:\n- Que tienes saldo suficiente\n- Que la billetera destino existe y está activa\n- Que los datos de la transacción son correctos\n\nSi el problema persiste, contacta a soporte.\n\nSaludos,\nEquipo de Billeteras Virtuales";
+        return sendEmail(message, subject, email);
+    }
+
+    public Notification LevelUp(String email, String level, String beneficios) {
+        String subject = "🎉 ¡HAS ACTUALIZADO TU NIVEL!";
+        String message = "Hola,\n\n¡Felicidades! Has alcanzado el nivel " + level
+                + ".\n\nAhora disfrutas de los siguientes beneficios:\n" + beneficios
+                + "\n\nSigue usando FinWallet para seguir subiendo de nivel.\n\nSaludos,\nEquipo de Billeteras Virtuales";
+        return sendEmail(message, subject, email);
+    }
+
+    public Notification TransactionReverse(String email, int puntos) {
+        String subject = "🔄 TRANSACCIÓN REVERTIDA";
+        String message = "Hola,\n\nTu transacción fue revertida exitosamente.\n\nSe te descontaron " + puntos
+                + " puntos.\n\nSaludos,\nEquipo de Billeteras Virtuales";
+        return sendEmail(message, subject, email);
+    }
+
+    public Notification sendVerificationEmail(String email, String token) {
+        String link = "http://localhost:3000/verify-email?token=" + token;
+
+        String subject = "🔐 Verifica tu cuenta - FinWallet";
+        String message = "Hola,\n\n" +
+                "Gracias por registrarte en FinWallet.\n\n" +
+                "Para activar tu cuenta, haz clic en el siguiente enlace:\n\n" +
+                link + "\n\n" +
+                "Este enlace es válido por tiempo limitado y es de un solo uso.\n\n" +
+                "Si no creaste esta cuenta, ignora este mensaje.\n\n" +
+                "Saludos,\nEquipo de FinWallet";
+
+        logger.info("📧 Enviando email de verificación a: {} con token: {}", email, token);
+        return sendEmail(message, subject, email);
+    }
+
+    public Notification notificationTransactionProgramadaCreada(String email) {
+        String subject = "✅ Operación programada registrada";
+        String message = "Hola,\n\nTu operación programada fue registrada exitosamente.\n\nSe ejecutará automáticamente en la fecha y hora indicada.\n\nSaludos,\nEquipo de FinWallet";
+        return sendEmail(message, subject, email);
+    }
+
+    public Notification notificationTransactionProgramada(String email) {
+        String subject = "✅ Operación programada ejecutada";
+        String message = "Hola,\n\nTu operación programada fue ejecutada exitosamente.\n\nPuedes verificar el detalle en tu historial de transacciones.\n\nSaludos,\nEquipo de FinWallet";
+        return sendEmail(message, subject, email);
+    }
+
+    public Notification anomalyDetection(String email) {
+        String subject = "🔄 TRANSACCIÓN SOSPECHOSA";
+        String message = "Hola,\n\nHicieste una Transaccion sospechosa, su monto fue mayor al promedio de las otras ";
+        return sendEmail(message, subject, email);
+    }
+
+    public Notification anomalyHighAmount(String email) {
+        String subject = "🚨 Alerta: Monto inusualmente alto detectado";
+        String message = "Hola,\n\nHemos detectado una transacción con un monto inusualmente alto respecto a tu historial.\n\nSi no reconoces esta operación, contacta a soporte de inmediato.\n\nSaludos,\nEquipo de Billeteras Virtuales";
+        return sendEmail(message, subject, email);
+    }
+
+    public Notification anomalyFastTransfers(String email) {
+        String subject = "⚡ Alerta: Múltiples transferencias en poco tiempo";
+        String message = "Hola,\n\nHemos detectado varias transferencias consecutivas en un período muy corto de tiempo.\n\nSi no reconoces estas operaciones, contacta a soporte de inmediato.\n\nSaludos,\nEquipo de Billeteras Virtuales";
+        return sendEmail(message, subject, email);
+    }
+
+    public Notification anomalyRepetitiveTransfers(String email) {
+        String subject = "🔁 Alerta: Transferencias repetitivas al mismo destino";
+        String message = "Hola,\n\nHemos detectado múltiples transferencias hacia el mismo destinatario en un intervalo reducido de tiempo.\n\nSi no reconoces estas operaciones, contacta a soporte de inmediato.\n\nSaludos,\nEquipo de Billeteras Virtuales";
+        return sendEmail(message, subject, email);
+    }
+
+    public Notification anomalyNocturnalActivity(String email) {
+        String subject = "🌙 Alerta: Actividad nocturna inusual";
+        String message = "Hola,\n\nHemos detectado varias transacciones realizadas en horario nocturno, lo cual es inusual en tu historial.\n\nSi no reconoces estas operaciones, contacta a soporte de inmediato.\n\nSaludos,\nEquipo de Billeteras Virtuales";
+        return sendEmail(message, subject, email);
+    }
+
+public Notification sendResetPasswordEmail(String email, String token) {
+    String link = "http://localhost:3000/reset-password?token=" + token;
+    String subject = "🔐 Recupera tu contraseña - FinWallet";
+    String message = "Hola,\n\n" +
+            "Hemos recibido una solicitud para restablecer tu contraseña.\n\n" +
+            "Para crear una nueva contraseña, haz clic en el siguiente enlace:\n\n" +
+            link + "\n\n" +
+            "Este enlace es válido por 1 hora.\n\n" +
+            "Si no solicitaste esto, ignora este mensaje.\n\n" +
+            "Saludos,\nEquipo de FinWallet";
+    return sendEmail(message, subject, email);
+}
+
+    public Queue<Notification> notificationQueue(String userId) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        List<Notification> notifications = notificationRepository.findByEmail(user.getEmail());
+
+        Queue<Notification> notificationsQueue = new Queue<Notification>();
+
+        for (Notification t : notifications) {
+            notificationsQueue.enqueue(t);
+        }
+
+        return notificationsQueue;
+
+    }
+
+    public void notificationQueueToday(String userId) {
+
+    }
+}
