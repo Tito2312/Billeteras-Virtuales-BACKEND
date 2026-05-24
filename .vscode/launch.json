@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-DbilleterasVirtualesApplication<dbilleteras-virtuales>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.fintech.dbilleteras_virtuales.DbilleterasVirtualesApplication",
+            "projectName": "dbilleteras-virtuales",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
