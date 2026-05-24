@@ -15,10 +15,14 @@ import com.fintech.dbilleteras_virtuales.repository.NotificationRepository;
 import com.fintech.dbilleteras_virtuales.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 
 @Service
 @RequiredArgsConstructor
 public class NotificationService {
+
+    @Value("${app.frontend.url}")
+    private String frontendUrl;
 
     private static final Logger logger = LoggerFactory.getLogger(NotificationService.class);
 
@@ -97,7 +101,7 @@ public class NotificationService {
     }
 
     public Notification sendVerificationEmail(String email, String token) {
-        String link = "http://localhost:3000/verify-email?token=" + token;
+        String link = frontendUrl + "/verify-email?token=" + token;
 
         String subject = "🔐 Verifica tu cuenta - FinWallet";
         String message = "Hola,\n\n" +
@@ -155,7 +159,7 @@ public class NotificationService {
     }
 
 public Notification sendResetPasswordEmail(String email, String token) {
-    String link = "http://localhost:3000/reset-password?token=" + token;
+    String link = frontendUrl + "/reset-password?token=" + token;
     String subject = "🔐 Recupera tu contraseña - FinWallet";
     String message = "Hola,\n\n" +
             "Hemos recibido una solicitud para restablecer tu contraseña.\n\n" +
