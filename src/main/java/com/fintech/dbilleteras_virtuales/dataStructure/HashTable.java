@@ -69,7 +69,6 @@ public class HashTable<K, V> {
 
     public boolean isEmpty() { return size == 0; }
 
-    // Clase interna para cada par clave-valor
     private static class Entry<K, V> {
         K key;
         V value;

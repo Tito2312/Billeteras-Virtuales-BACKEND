@@ -1,7 +1,7 @@
 package com.fintech.dbilleteras_virtuales.dataStructure;
 
 public class GraphEdge {
-    
+
     public String sourceUserId;
     public String targetUserId;
     public double amount;

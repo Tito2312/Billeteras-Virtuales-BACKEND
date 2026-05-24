@@ -1,7 +1,7 @@
 package com.fintech.dbilleteras_virtuales.dataStructure;
 
 public class GraphNode {
-    
+
     public String userId;
     public String userName;
 

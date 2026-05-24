@@ -18,8 +18,6 @@ public class HashTableController {
 
     private final HashTableService hashTableService;
 
-    // -- USUARIOS --
-
     @GetMapping("/users")
     public ResponseEntity<List<User>> getAllUsers() {
         return ResponseEntity.ok(hashTableService.getAllUsers());
@@ -29,8 +27,6 @@ public class HashTableController {
     public ResponseEntity<User> getUserById(@PathVariable String userId) {
         return ResponseEntity.ok(hashTableService.getUserById(userId));
     }
-
-    // -- BILLETERAS --
 
     @GetMapping("/wallets")
     public ResponseEntity<List<Wallet>> getAllWallets() {

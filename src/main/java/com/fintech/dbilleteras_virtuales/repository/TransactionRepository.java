@@ -37,4 +37,6 @@ public interface TransactionRepository extends MongoRepository<Transaction, Stri
             LocalDateTime fin);
 
     List<Transaction> findByTypeAndReceiverUserIdNotNull(TransactionType type);
+
+    List<Transaction> findByTypeAndCreatedAtBetween(TransactionType type, LocalDateTime start, LocalDateTime end);
 }

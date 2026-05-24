@@ -14,12 +14,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Benefit {
-    
+
     @Id
     private String id;
     private String code;
     private String name;
     private String description;
     private int pointsCost;
+    private double moneyValue; 
     private boolean active = true;
 }

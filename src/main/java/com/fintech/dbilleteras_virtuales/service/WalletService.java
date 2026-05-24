@@ -31,8 +31,8 @@ public class WalletService {
         }
 
         String transferKey = generateTransferKey(request.getName(), user.getDocumentNumber());
-        
-        if (!walletRepository.findByTransferKey(transferKey).isPresent()) {
+
+        if (walletRepository.findByTransferKey(transferKey).isPresent()) {
             throw new RuntimeException("Ya existe una billetera con esta llave");
         }
 
@@ -71,7 +71,7 @@ public class WalletService {
             .orElseThrow(() -> new RuntimeException());
 
         String newTransferKey = generateTransferKey(request.getName(), user.getDocumentNumber());
-        
+
         Optional<Wallet> existingWallet = walletRepository.findByTransferKey(newTransferKey);
         if (existingWallet.isPresent() && !existingWallet.get().getId().equals(id)) {
             throw new RuntimeException("Ya existe una billetera con este nombre");
@@ -127,7 +127,16 @@ public class WalletService {
         }
 
         wallet.setBalance(newBalance);
-        return walletRepository.save(wallet);
+        Wallet saved = walletRepository.save(wallet);
+
+        if (amount < 0 && newBalance < 10000) {
+            var user = userRepository.findById(userId).orElse(null);
+            if (user != null) {
+                notificationService.notificationLowBalance(user.getEmail(), wallet.getName(), newBalance);
+            }
+        }
+
+        return saved;
     }
 
     public Wallet validateWalletExists(String walletId, String userId) {

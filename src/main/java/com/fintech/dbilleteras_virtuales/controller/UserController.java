@@ -43,7 +43,6 @@ public ResponseEntity<User> updateUser(
         @RequestBody @Valid UpdatedUserDto updatedUser,
         @AuthenticationPrincipal UserDetails currentUser) {
 
-    // Normalizar emails (trim y lowerCase)
     String tokenEmail = currentUser.getUsername().trim().toLowerCase();
     String requestEmail = updatedUser.getEmail().trim().toLowerCase();
 

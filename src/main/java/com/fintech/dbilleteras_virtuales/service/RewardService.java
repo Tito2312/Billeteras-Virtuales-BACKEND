@@ -23,7 +23,7 @@ public class RewardService {
             case WITHDRAWAL -> 2;
             case TRANSFER -> 3;
         };
-        return (int) (amount / 100) * multiplier;
+        return (int) (amount / 500) * multiplier;
     }
 
     public void updateUserPoints(String userId, int points) {

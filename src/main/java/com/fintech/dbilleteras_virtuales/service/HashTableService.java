@@ -19,8 +19,6 @@ public class HashTableService {
     private final UserRepository userRepository;
     private final WalletRepository walletRepository;
 
-    // -- USUARIOS --
-
     private HashTable<String, User> buildUserTable() {
         HashTable<String, User> table = new HashTable<>();
         userRepository.findAll().forEach(u -> table.put(u.getId(), u));
@@ -37,8 +35,6 @@ public class HashTableService {
     public List<User> getAllUsers() {
         return buildUserTable().values();
     }
-
-    // -- BILLETERAS --
 
     private HashTable<String, Wallet> buildWalletTable() {
         HashTable<String, Wallet> table = new HashTable<>();

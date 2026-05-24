@@ -5,14 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
-public class NotificationRequest {
+public class ResetPasswordRequest {
     @NotBlank
-    private String asunto;
-
-    @NotBlank
-    private String message;
-
     @Email
-    @NotBlank
     private String email;
 }

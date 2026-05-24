@@ -23,6 +23,6 @@ public class RedeemedBenefit {
     private String benefitId;
     private String benefitName;
     private int pointsSpent;
-    private String status; // ACTIVE, USED, EXPIRED
+    private String status; 
     private LocalDateTime redeemedAt;
 }

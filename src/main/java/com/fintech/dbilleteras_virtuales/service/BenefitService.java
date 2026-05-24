@@ -21,6 +21,7 @@ public class BenefitService {
     private final BenefitRepository benefitRepository;
     private final RedeemedBenefitRepository redeemedBenefitRepository;
     private final UserRepository userRepository;
+    private final WalletService walletService;
 
     public List<Benefit> getAvailableBenefits() {
         return benefitRepository.findByActiveTrue();
@@ -30,7 +31,7 @@ public class BenefitService {
         return redeemedBenefitRepository.findByUserId(userId);
     }
 
-    public RedeemedBenefit redeem(String userId, String benefitId) {
+    public RedeemedBenefit redeem(String userId, String benefitId, String walletId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
@@ -42,12 +43,16 @@ public class BenefitService {
         }
 
         if (user.getPoints() < benefit.getPointsCost()) {
-            throw new RuntimeException("Puntos insuficientes. Necesitas " 
-                + benefit.getPointsCost() + " puntos y tienes " + user.getPoints());
+            throw new RuntimeException("Puntos insuficientes. Necesitas "
+                    + benefit.getPointsCost() + " puntos y tienes " + user.getPoints());
         }
 
         user.setPoints(user.getPoints() - benefit.getPointsCost());
         userRepository.save(user);
+
+        if (walletId != null && !walletId.isEmpty() && benefit.getMoneyValue() > 0) {
+            walletService.updateBalance(walletId, userId, benefit.getMoneyValue());
+        }
 
         RedeemedBenefit redeemed = RedeemedBenefit.builder()
                 .userId(userId)
@@ -60,9 +65,11 @@ public class BenefitService {
 
         RedeemedBenefit saved = redeemedBenefitRepository.save(redeemed);
 
-        // notificationService.notificationBenefitRedeemed(user.getEmail(), benefit.getName());
-
         return saved;
+    }
+
+    public List<RedeemedBenefit> getAllRedeemed(){
+        return redeemedBenefitRepository.findAll();
     }
 
     public RedeemedBenefit useBenefit(String redeemedBenefitId, String userId) {
