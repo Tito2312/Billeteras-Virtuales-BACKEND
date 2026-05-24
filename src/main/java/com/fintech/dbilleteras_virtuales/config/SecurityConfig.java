@@ -35,7 +35,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:3000"));
+        config.setAllowedOrigins(List.of("https://billeteras-virtuales-frontend.vercel.app"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
@@ -52,25 +52,25 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/chatGpt").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/graph/path").authenticated()
-                .requestMatchers(HttpMethod.GET, "/api/graph/cycles").authenticated()
-                .requestMatchers("/api/graph/**").hasRole("ADMIN")
-                .requestMatchers("/api/hashtable/**").hasRole("ADMIN")
-                .requestMatchers("/api/tree/**").hasRole("ADMIN")
-                .requestMatchers("/api/reports/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.GET, "/api/benefits").authenticated()
-                .requestMatchers(HttpMethod.GET, "/api/benefits/redeemed/**").authenticated()
-                .requestMatchers(HttpMethod.GET, "/api/benefits/redeemed").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.POST, "/api/benefits/redeem").authenticated()
-                .requestMatchers(HttpMethod.PATCH, "/api/benefits/use/**").authenticated()
-                .requestMatchers(HttpMethod.POST, "/api/benefits").hasRole("ADMIN")
-                .requestMatchers("/api/benefits/toggle/**").hasRole("ADMIN")
-                .requestMatchers("/api/auth/forgot-password").permitAll()
-                .requestMatchers("/api/auth/reset-password").permitAll()
-                .anyRequest().authenticated())
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/chatGpt").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/graph/path").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/graph/cycles").authenticated()
+                        .requestMatchers("/api/graph/**").hasRole("ADMIN")
+                        .requestMatchers("/api/hashtable/**").hasRole("ADMIN")
+                        .requestMatchers("/api/tree/**").hasRole("ADMIN")
+                        .requestMatchers("/api/reports/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/benefits").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/benefits/redeemed/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/benefits/redeemed").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/benefits/redeem").authenticated()
+                        .requestMatchers(HttpMethod.PATCH, "/api/benefits/use/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/benefits").hasRole("ADMIN")
+                        .requestMatchers("/api/benefits/toggle/**").hasRole("ADMIN")
+                        .requestMatchers("/api/auth/forgot-password").permitAll()
+                        .requestMatchers("/api/auth/reset-password").permitAll()
+                        .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
