@@ -21,6 +21,6 @@ public class Benefit {
     private String name;
     private String description;
     private int pointsCost;
-    private double moneyValue; // dinero que se acredita al canjear (COP)
+    private double moneyValue; 
     private boolean active = true;
 }

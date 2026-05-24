@@ -266,17 +266,16 @@ public class TransactionService {
                     .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
             double commissionRate = getCommissionRateByLevel(user.getLevel());
             double commissionAmount = amount * commissionRate;
-            double receiverAmount = amount - commissionAmount; // Lo que realmente recibe el destino
+            double receiverAmount = amount - commissionAmount; 
 
-            // 6. Crear transacción
             Transaction transaction = new Transaction();
             transaction.setUserId(userId);
             transaction.setReceiverUserId(receiverUserId);
             transaction.setSourceWallet(sourceWallet);
             transaction.setTargetWallet(targetWallet);
-            transaction.setAmount(receiverAmount); // Monto que recibe el destinatario
-            transaction.setOriginalAmount(amount); // Monto original enviado
-            transaction.setCommissionAmount(commissionAmount); // Comisión cobrada
+            transaction.setAmount(receiverAmount); 
+            transaction.setOriginalAmount(amount); 
+            transaction.setCommissionAmount(commissionAmount); 
             transaction.setCreatedAt(LocalDateTime.now());
             transaction.setType(TransactionType.TRANSFER);
             transaction.setStatus(TransactionStatus.COMPLETED);

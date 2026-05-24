@@ -35,17 +35,14 @@ public class AuthService {
     public AuthResponse register(RegisterRequest request) {
         logger.info("📝 Intentando registrar usuario: {}", request.getEmail());
 
-        // Verificar si el email ya existe
         if (userRepository.existsByEmail(request.getEmail())) {
             logger.warn("❌ Email ya registrado: {}", request.getEmail());
             throw new RuntimeException("El correo electronico ya esta en uso");
         }
 
-        // Generar token de verificación
         String verificationToken = UUID.randomUUID().toString();
         logger.info("🔑 Token de verificación generado: {}", verificationToken);
 
-        // Crear usuario (inactivo hasta verificar email)
         User user = User.builder()
                 .name(request.getName())
                 .email(request.getEmail())
@@ -57,7 +54,6 @@ public class AuthService {
                 .role(Role.ROLE_USER)
                 .build();
 
-        // Guardar usuario en la base de datos
         User savedUser = userRepository.save(user);
         logger.info("✅ Usuario guardado en BD: {} con ID: {}", savedUser.getEmail(), savedUser.getId());
 
@@ -70,20 +66,18 @@ public class AuthService {
             .createdAt(LocalDate.now())
             .transferKey(walletService.generateTransferKey("Mi billetera", savedUser.getDocumentNumber()))
             .build();
-            
+
         walletRepository.save(defaultWallet);
 
-        // Intentar enviar email de verificación
         try {
             notificationService.sendVerificationEmail(savedUser.getEmail(), verificationToken);
             logger.info("📧 Email de verificación enviado a: {}", savedUser.getEmail());
         } catch (Exception e) {
             logger.error("❌ Error al enviar email de verificación a {}: {}", savedUser.getEmail(), e.getMessage());
-            // No relanzamos la excepción para que el registro no falle
+
             logger.warn("⚠️ El usuario se registró pero el email no se pudo enviar. Verificar configuración SMTP.");
         }
 
-        // Generar token JWT
         String token = jwtService.generateToken(savedUser);
         logger.info("🎫 Token JWT generado para: {}", savedUser.getEmail());
 
@@ -137,27 +131,26 @@ public class AuthService {
         logger.info("✅ Cuenta verificada exitosamente: {}", user.getEmail());
     }
 
-
 public void forgotPassword(String email) {
     User user = userRepository.findByEmail(email)
         .orElseThrow(() -> new RuntimeException("No existe un usuario con ese correo electrónico"));
-    
+
     String token = UUID.randomUUID().toString();
     user.setResetPasswordToken(token);
     user.setResetPasswordExpiry(LocalDateTime.now().plusHours(1));
     userRepository.save(user);
-    
+
     notificationService.sendResetPasswordEmail(user.getEmail(), token);
 }
 
 public void resetPassword(String token, String newPassword) {
     User user = userRepository.findByResetPasswordToken(token)
         .orElseThrow(() -> new RuntimeException("Token inválido o expirado"));
-    
+
     if (user.getResetPasswordExpiry().isBefore(LocalDateTime.now())) {
         throw new RuntimeException("El enlace ha expirado. Solicita un nuevo restablecimiento.");
     }
-    
+
     user.setPassword(passwordEncoder.encode(newPassword));
     user.setResetPasswordToken(null);
     user.setResetPasswordExpiry(null);
@@ -168,14 +161,14 @@ public void changePassword(String userId, String currentPassword, String newPass
     if (!newPassword.equals(confirmPassword)) {
         throw new RuntimeException("Las contraseñas nuevas no coinciden");
     }
-    
+
     User user = userRepository.findById(userId)
         .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-    
+
     if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
         throw new RuntimeException("Contraseña actual incorrecta");
     }
-    
+
     user.setPassword(passwordEncoder.encode(newPassword));
     userRepository.save(user);
 }

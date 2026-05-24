@@ -31,7 +31,7 @@ public class WalletService {
         }
 
         String transferKey = generateTransferKey(request.getName(), user.getDocumentNumber());
-        
+
         if (walletRepository.findByTransferKey(transferKey).isPresent()) {
             throw new RuntimeException("Ya existe una billetera con esta llave");
         }
@@ -71,7 +71,7 @@ public class WalletService {
             .orElseThrow(() -> new RuntimeException());
 
         String newTransferKey = generateTransferKey(request.getName(), user.getDocumentNumber());
-        
+
         Optional<Wallet> existingWallet = walletRepository.findByTransferKey(newTransferKey);
         if (existingWallet.isPresent() && !existingWallet.get().getId().equals(id)) {
             throw new RuntimeException("Ya existe una billetera con este nombre");

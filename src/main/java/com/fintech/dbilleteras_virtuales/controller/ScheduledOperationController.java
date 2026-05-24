@@ -24,7 +24,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/scheduledOperation")
 @RequiredArgsConstructor
 public class ScheduledOperationController {
-    
+
     private final ScheduledOperationService scheduledOperationService;
 
     @PostMapping
@@ -34,7 +34,7 @@ public class ScheduledOperationController {
 
     @PostMapping("/executeOperation/{id}")
     public ResponseEntity<ScheduledOperation> execute(@PathVariable String id, @RequestBody @Valid ScheduledOperation operation){
-        // El cuerpo no es necesario realmente, pero se mantiene por compatibilidad
+
         return ResponseEntity.ok(scheduledOperationService.executeOperation(operation));
     }
 
@@ -47,7 +47,7 @@ public class ScheduledOperationController {
     public ResponseEntity<List<ScheduledOperation>> findAll() {
         return ResponseEntity.ok(scheduledOperationService.findAll());
     }
-    
+
    @PutMapping("/{id}")
 public ResponseEntity<ScheduledOperation> update(
         @PathVariable String id,

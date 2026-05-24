@@ -8,10 +8,10 @@ import lombok.Data;
 public class NotificationRequest {
     @NotBlank
     private String asunto;
-    
+
     @NotBlank
     private String message;
-    
+
     @Email
     @NotBlank
     private String email;

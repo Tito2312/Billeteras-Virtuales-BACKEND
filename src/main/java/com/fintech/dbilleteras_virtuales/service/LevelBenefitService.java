@@ -40,10 +40,10 @@ public class LevelBenefitService {
 
     public int getProcessingPriority(String level) {
         return switch (level) {
-            case "Platino", "Platinum" -> 1;  // Prioridad más alta
+            case "Platino", "Platinum" -> 1;  
             case "Oro", "Gold" -> 2;
             case "Plata", "Silver" -> 3;
-            case "Bronce", "Bronze" -> 4;      // Prioridad más baja
+            case "Bronce", "Bronze" -> 4;      
             default -> 4;
         };
     }

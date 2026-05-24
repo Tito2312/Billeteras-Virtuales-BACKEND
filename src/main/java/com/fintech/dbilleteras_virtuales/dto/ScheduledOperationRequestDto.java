@@ -9,14 +9,14 @@ import lombok.Data;
 
 @Data
 public class ScheduledOperationRequestDto {
-    
+
     @NotBlank(message = "El userId es obligatorio")
     private String userId;
 
     private String sourceWalletId;
 
     private String targetWalletId;
-    
+
     private String transferKey; 
 
     @NotNull(message = "El tipo de operación es obligatorio")
