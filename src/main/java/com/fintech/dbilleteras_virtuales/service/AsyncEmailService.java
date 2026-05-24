@@ -35,7 +35,7 @@ public class AsyncEmailService {
             headers.set("Authorization", "Bearer " + resendApiKey);
 
             Map<String, Object> body = Map.of(
-                    "from", "FinWallet <noreply@walletteachuq.co>",
+                    "from", "FinWallet <noreply@walletechuq.online>",
                     "to", correo.getTo(),
                     "subject", correo.getSubject(),
                     "text", correo.getText());
