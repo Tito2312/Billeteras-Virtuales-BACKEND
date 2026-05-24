@@ -1,0 +1,31 @@
+package com.fintech.dbilleteras_virtuales.model;
+
+import java.time.LocalDateTime;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import lombok.*;
+
+@Document(collection = "scheduledOperations")
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class ScheduledOperation {
+
+    @Id
+    private String id;
+
+    private String userId;
+    private String sourceWalletId;
+    private String targetWalletId;
+    private String transferKey;
+    private TransactionType type;
+    private double amount;
+    private LocalDateTime scheduledDate;
+    private boolean executed;
+    private ScheduledOperationStatus status = ScheduledOperationStatus.PENDING;
+    private String errorMessage;
+    private LocalDateTime createdAt;
+}
