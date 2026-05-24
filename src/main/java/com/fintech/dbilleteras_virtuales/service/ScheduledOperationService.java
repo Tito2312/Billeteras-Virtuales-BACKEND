@@ -30,11 +30,10 @@ public class ScheduledOperationService {
     private final NotificationService notificationService;
     private final LevelBenefitService levelBenefitService;
 
-    // Clase auxiliar para guardar operación con su prioridad
     private static class OperationWithPriority {
         ScheduledOperation operation;
         int priority;
-        
+
         OperationWithPriority(ScheduledOperation operation, int priority) {
             this.operation = operation;
             this.priority = priority;
@@ -44,9 +43,9 @@ public class ScheduledOperationService {
     public ScheduledOperation createOperation(ScheduledOperationRequestDto request) {
         User user = userRepository.findById(request.getUserId())
             .orElseThrow(() -> new RuntimeException("Usuario no encontrado al crear la operación programada"));
-        
+
         System.out.println("✅ Creando operación para usuario: " + user.getEmail() + " | Nivel: " + user.getLevel());
-        
+
         ScheduledOperation operation = ScheduledOperation.builder()
                 .userId(request.getUserId())
                 .sourceWalletId(request.getSourceWalletId())
@@ -90,13 +89,13 @@ public class ScheduledOperationService {
 
     public ScheduledOperation executeOperation(ScheduledOperation operation) {
         System.out.println("🚀 Ejecutando operación ID: " + operation.getId() + " | Tipo: " + operation.getType());
-        
+
         try {
             User user = userRepository.findById(operation.getUserId())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + operation.getUserId()));
-            
+
             System.out.println("✅ Usuario encontrado: " + user.getEmail() + " | Nivel: " + user.getLevel());
-            
+
             switch (operation.getType()) {
                 case RECHARGE:
                     transactionService.recharge(operation.getUserId(), operation.getTargetWalletId(), operation.getAmount());
@@ -116,7 +115,7 @@ public class ScheduledOperationService {
                 default:
                     throw new RuntimeException("Tipo de operacion no disponible: " + operation.getType());
             }
-            
+
             operation.setExecuted(true);
             operation.setStatus(ScheduledOperationStatus.EXECUTED);
             System.out.println("✅ Operación ejecutada exitosamente: " + operation.getId());
@@ -124,7 +123,7 @@ public class ScheduledOperationService {
             notificationService.notificationTransactionProgramada(user.getEmail());
 
             return scheduledOperationRepository.save(operation);
-            
+
         } catch (Exception e) {
             System.err.println("❌ Error ejecutando operación " + operation.getId() + ": " + e.getMessage());
             e.printStackTrace();
@@ -167,18 +166,18 @@ public class ScheduledOperationService {
     @Scheduled(fixedDelay = 30000)
     public void processPending() {
         System.out.println("\n🔄 ===== EJECUTANDO SCHEDULER DE OPERACIONES PROGRAMADAS =====");
-        
+
         LocalDateTime nowColombia = LocalDateTime.now(ZoneId.of("America/Bogota"));
         LocalDateTime nowUTC = nowColombia.atZone(ZoneId.of("America/Bogota"))
                 .withZoneSameInstant(ZoneOffset.UTC)
                 .toLocalDateTime();
-        
+
         System.out.println("⏰ Hora actual Colombia: " + nowColombia);
         System.out.println("⏰ Hora actual UTC en BD: " + nowUTC);
-        
+
         List<ScheduledOperation> allPending = scheduledOperationRepository.findByStatus(ScheduledOperationStatus.PENDING);
         System.out.println("📋 Total operaciones PENDING en BD: " + allPending.size());
-        
+
         List<ScheduledOperation> toExecute = new ArrayList<>();
         for (ScheduledOperation op : allPending) {
             System.out.println("   🔍 Operación: " + op.getId() + " | Fecha programada: " + op.getScheduledDate());
@@ -190,31 +189,31 @@ public class ScheduledOperationService {
                 System.out.println("      ⏳ Futura - falta: " + minutosFaltan + " minutos");
             }
         }
-        
+
         if (toExecute.isEmpty()) {
             System.out.println("ℹ️ No hay operaciones vencidas para procesar\n");
             return;
         }
-        
+
         List<OperationWithPriority> operationsWithPriority = new ArrayList<>();
         for (ScheduledOperation op : toExecute) {
             operationsWithPriority.add(new OperationWithPriority(op, getPriorityByUserLevel(op.getUserId())));
         }
         operationsWithPriority.sort((a, b) -> Integer.compare(a.priority, b.priority));
-        
+
         System.out.println("\n📊 Operaciones ordenadas por prioridad:");
         for (OperationWithPriority owp : operationsWithPriority) {
             System.out.println("   - Operación: " + owp.operation.getId() + " | Prioridad: " + owp.priority);
         }
-        
+
         for (OperationWithPriority owp : operationsWithPriority) {
             System.out.println("▶️ Ejecutando operación: " + owp.operation.getId());
             executeOperation(owp.operation);
         }
-        
+
         System.out.println("✅ ===== FIN DEL PROCESAMIENTO =====\n");
     }
-    
+
     public List<ScheduledOperation> findByUser(String userId) {
         return scheduledOperationRepository.findByUserId(userId);
     }
@@ -223,8 +222,6 @@ public class ScheduledOperationService {
         return scheduledOperationRepository.findAll();
     }
 
-    // ==================== NUEVOS MÉTODOS (EDITAR Y ELIMINAR) ====================
-    
     public ScheduledOperation updateOperation(String id, ScheduledOperationRequestDto request, String userId) {
     ScheduledOperation existing = scheduledOperationRepository.findByIdAndUserId(id, userId)
         .orElseThrow(() -> new RuntimeException("Operación no encontrada o no autorizada"));
@@ -250,15 +247,14 @@ public void deleteOperation(String id, String userId) {
         throw new RuntimeException("No se puede eliminar una operación ya ejecutada o fallida");
     }
     scheduledOperationRepository.delete(existing);
-        
-        // Notificación opcional (si no existe el método, comenta esta línea)
+
         try {
             User user = userRepository.findById(userId).orElse(null);
             if (user != null) {
-                // notificationService.notificationTransactionProgramadaEliminada(user.getEmail());
+
             }
         } catch (Exception e) { }
-        
+
         scheduledOperationRepository.delete(existing);
     }
 }

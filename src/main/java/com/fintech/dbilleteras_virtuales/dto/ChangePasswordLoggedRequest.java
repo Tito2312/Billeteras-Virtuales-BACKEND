@@ -8,11 +8,11 @@ import lombok.Data;
 public class ChangePasswordLoggedRequest {
     @NotBlank
     private String currentPassword;
-    
+
     @NotBlank
     @Size(min = 6)
     private String newPassword;
-    
+
     @NotBlank
     private String confirmPassword;
 }

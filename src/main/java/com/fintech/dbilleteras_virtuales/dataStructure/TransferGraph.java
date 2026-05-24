@@ -60,7 +60,7 @@ public class TransferGraph {
     }
 
     public List<String> findPath(String sourceUserId, String targetUserId) {
-        // Build undirected view: both sent and received edges count as connections
+
         Map<String, List<String>> undirected = new HashMap<>();
         for (Map.Entry<String, List<GraphEdge>> entry : adjacencyList.entrySet()) {
             String from = entry.getKey();

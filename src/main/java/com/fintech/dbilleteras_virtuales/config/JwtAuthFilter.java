@@ -55,7 +55,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
 
         } catch (Exception e) {
-            // Esto nos va a mostrar el error real en consola
+
             System.err.println("Error en JwtAuthFilter: " + e.getMessage());
             e.printStackTrace();
             filterChain.doFilter(request, response);

@@ -31,7 +31,6 @@ public class PerformanceService {
 
         System.out.println("\n===== COMPARACIÓN DE RENDIMIENTO =====");
 
-        // 1. LinkedList vs PriorityQueue — top transacciones por monto
         long start1 = System.nanoTime();
         LinkedList<Transaction> lista = new LinkedList<>();
         for (Transaction t : transactions) lista.add(t);
@@ -52,7 +51,6 @@ public class PerformanceService {
         long end2 = System.nanoTime();
         System.out.println("PriorityQueue - extraer máximo: " + (end2 - start2) + " ns");
 
-        // 2. LinkedList vs HashTable — búsqueda de usuario por ID
         if (!users.isEmpty()) {
             String targetId = users.get(0).getId();
 
