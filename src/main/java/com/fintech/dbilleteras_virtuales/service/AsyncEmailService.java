@@ -1,5 +1,8 @@
 package com.fintech.dbilleteras_virtuales.service;
 
+import java.util.Arrays;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,9 +12,8 @@ import org.springframework.http.MediaType;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.Map;
 
 @Service
 public class AsyncEmailService {
@@ -26,22 +28,27 @@ public class AsyncEmailService {
 
     @Async
     public void send(SimpleMailMessage correo) {
+        String destinatario = Arrays.toString(correo.getTo());
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.set("Authorization", "Bearer " + resendApiKey);
 
             Map<String, Object> body = Map.of(
-                    "from", "FinWallet <onboarding@resend.dev>",
+                    "from", "FinWallet <noreply@walletteachuq.co>",
                     "to", correo.getTo(),
                     "subject", correo.getSubject(),
                     "text", correo.getText());
 
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
-            restTemplate.postForObject(RESEND_URL, request, String.class);
-            logger.info("✅ Email enviado via Resend a: {}", (Object) correo.getTo());
+            String response = restTemplate.postForObject(RESEND_URL, request, String.class);
+            logger.info("✅ Email enviado a: {} | Resend: {}", destinatario, response);
+
+        } catch (HttpClientErrorException e) {
+            logger.error("❌ Resend rechazó el email a: {} | Status: {} | Error: {}",
+                    destinatario, e.getStatusCode(), e.getResponseBodyAsString());
         } catch (Exception e) {
-            logger.error("❌ Error al enviar email via Resend: {}", e.getMessage());
+            logger.error("❌ Error enviando email a: {} | {}", destinatario, e.getMessage());
         }
     }
 }
